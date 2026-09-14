@@ -7,25 +7,11 @@ from google import genai
 
 load_dotenv()
 
-# 1) Ưu tiên đọc từ biến môi trường / file .env (chạy local)
 api_key = os.getenv("GEMINI_API_KEY")
-
-# 2) Nếu không có, thử đọc từ st.secrets (khi chạy trên Streamlit Cloud,
-#    Secrets không phải lúc nào cũng tự inject vào os.environ)
-if not api_key:
-    try:
-        import streamlit as st
-        api_key = st.secrets.get("GEMINI_API_KEY")
-    except Exception:
-        # Không chạy trong môi trường Streamlit (vd: test_ai.py, main.py chạy local)
-        # hoặc chưa cấu hình secrets.toml -> bỏ qua, để rơi xuống lỗi bên dưới.
-        pass
 
 if not api_key:
     raise ValueError(
-        "Không tìm thấy GEMINI_API_KEY. "
-        "Chạy local: kiểm tra file .env có dòng GEMINI_API_KEY=... "
-        "Chạy trên Streamlit Cloud: kiểm tra Manage app → Settings → Secrets."
+        "Không tìm thấy GEMINI_API_KEY trong file .env"
     )
 
 client = genai.Client(
@@ -96,7 +82,7 @@ TÀI LIỆU:
     # với API key của bạn (vd: "gemini-2.0-flash", "gemini-1.5-flash", ...)
     # rồi thay giá trị bên dưới cho đúng.
     response = client.models.generate_content(
-        model="gemini-2.0-flash",
+        model="gemini-3.6-flash",
         contents=prompt
     )
 
