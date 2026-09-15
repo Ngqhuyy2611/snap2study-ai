@@ -1,5 +1,6 @@
 import os
 import json
+import time
 
 from dotenv import load_dotenv
 from google import genai
@@ -14,16 +15,12 @@ load_dotenv()
 api_key = os.getenv("GEMINI_API_KEY")
 
 if not api_key:
-
     raise ValueError(
         "Không tìm thấy GEMINI_API_KEY. "
         "Hãy kiểm tra file .env hoặc Streamlit Secrets."
     )
 
-
-client = genai.Client(
-    api_key=api_key
-)
+client = genai.Client(api_key=api_key)
 
 
 # =========================================================
@@ -35,97 +32,50 @@ def generate_study_material(
     number_of_cards=5,
     number_of_quiz=5
 ):
-
     if not text or not text.strip():
-
         raise ValueError(
             "Nội dung tài liệu đang trống."
         )
 
-
     prompt = f"""
-Bạn là Snap2Study AI,
-một trợ lý học tập dành cho học sinh THPT.
+Bạn là Snap2Study AI, một trợ lý học tập dành cho học sinh THPT.
 
-NHIỆM VỤ:
-
-Đọc tài liệu được cung cấp và tạo
-một bộ ôn tập dựa CHỈ trên tài liệu đó.
-
+Hãy đọc tài liệu dưới đây và tạo một bộ ôn tập.
 
 YÊU CẦU:
 
 1. Xác định chủ đề chính.
 
-2. Tạo một phần tóm tắt ngắn,
-rõ ràng và dễ hiểu.
+2. Tạo một phần tóm tắt ngắn, rõ ràng, dễ hiểu.
 
 3. Tạo tối đa {number_of_cards} Flashcard.
 
 Mỗi Flashcard gồm:
-
 - question
 - answer
 - difficulty
 
-Difficulty chỉ được dùng:
-
-"Dễ"
-"Trung bình"
-"Khó"
-
-
 4. Tạo tối đa {number_of_quiz} câu hỏi trắc nghiệm.
 
 Mỗi câu gồm:
-
 - question
-- options
-- answer
-- correct_answer
+- options: đúng 4 lựa chọn
+- answer: chỉ ghi A, B, C hoặc D
+- correct_answer: ghi đầy đủ nội dung đáp án đúng
 
+5. CHỈ sử dụng kiến thức xuất hiện trong tài liệu.
 
-Options phải có đúng 4 lựa chọn:
+6. Không tự bịa thêm kiến thức.
 
-A.
-B.
-C.
-D.
+7. Nếu tài liệu không đủ thông tin, hãy tạo ít câu hỏi hơn thay vì bịa.
 
+8. Nội dung phù hợp với học sinh THPT.
 
-answer phải CHỈ là một chữ:
+9. Ưu tiên những kiến thức quan trọng.
 
-A
-B
-C
-hoặc D
+10. Trả về JSON hợp lệ.
 
-
-correct_answer phải là nội dung đầy đủ
-của đáp án đúng.
-
-
-5. Chỉ sử dụng thông tin có trong tài liệu.
-
-6. Không được tự bịa kiến thức.
-
-7. Nếu tài liệu không đủ thông tin,
-có thể tạo ít Flashcard hoặc Quiz hơn.
-
-8. Ưu tiên kiến thức quan trọng.
-
-9. Nội dung phù hợp học sinh THPT.
-
-10. Không tạo câu hỏi có nhiều đáp án đúng.
-
-
-CHỈ TRẢ VỀ JSON.
-
-KHÔNG viết giải thích.
-
-KHÔNG dùng Markdown.
-
-CẤU TRÚC:
+CẤU TRÚC JSON:
 
 {{
     "topic": "Tên chủ đề",
@@ -143,118 +93,116 @@ CẤU TRÚC:
     "quiz": [
         {{
             "question": "Câu hỏi",
-
             "options": [
                 "A. Đáp án A",
                 "B. Đáp án B",
                 "C. Đáp án C",
                 "D. Đáp án D"
             ],
-
             "answer": "A",
-
-            "correct_answer": "Nội dung đầy đủ"
+            "correct_answer": "Nội dung đầy đủ của đáp án đúng"
         }}
     ]
 }}
 
+CHỈ TRẢ VỀ JSON.
 
 TÀI LIỆU:
-
 {text}
 """
 
-
     # =====================================================
-    # CALL GEMINI
-    # =====================================================
-
-    response = client.models.generate_content(
-
-        model="gemini-3.6-flash",
-
-        contents=prompt
-    )
-
-
-    if not response.text:
-
-        raise ValueError(
-            "Gemini không trả về nội dung."
-        )
-
-
-    result = response.text.strip()
-
-
-    # =====================================================
-    # REMOVE MARKDOWN CODE BLOCK
+    # RETRY KHI GEMINI QUÁ TẢI
     # =====================================================
 
-    if result.startswith("```json"):
+    max_attempts = 3
 
-        result = result[7:]
+    for attempt in range(max_attempts):
 
-    elif result.startswith("```"):
+        try:
 
-        result = result[3:]
+            response = client.models.generate_content(
+                model="gemini-3.6-flash",
+                contents=prompt
+            )
 
+            if not response.text:
+                raise ValueError(
+                    "Gemini không trả về nội dung."
+                )
 
-    if result.endswith("```"):
+            result = response.text.strip()
 
-        result = result[:-3]
+            # Loại bỏ markdown code block nếu có
+            if result.startswith("```json"):
+                result = result[7:]
 
+            elif result.startswith("```"):
+                result = result[3:]
 
-    result = result.strip()
+            if result.endswith("```"):
+                result = result[:-3]
 
+            result = result.strip()
 
-    # =====================================================
-    # PARSE JSON
-    # =====================================================
+            # Parse JSON
+            data = json.loads(result)
 
-    try:
+            if not isinstance(data, dict):
+                raise ValueError(
+                    "Dữ liệu AI trả về không hợp lệ."
+                )
 
-        data = json.loads(result)
+            # Đảm bảo luôn có các key cần thiết
+            data.setdefault(
+                "topic",
+                "Bài học mới"
+            )
 
-    except json.JSONDecodeError as e:
+            data.setdefault(
+                "summary",
+                "Không có phần tóm tắt."
+            )
 
-        raise ValueError(
-            "AI trả về dữ liệu không đúng JSON. "
-            f"Chi tiết: {e}"
-        )
+            data.setdefault(
+                "flashcards",
+                []
+            )
 
+            data.setdefault(
+                "quiz",
+                []
+            )
 
-    # =====================================================
-    # BASIC VALIDATION
-    # =====================================================
+            return data
 
-    if not isinstance(data, dict):
+        except Exception as e:
 
-        raise ValueError(
-            "Dữ liệu AI trả về không hợp lệ."
-        )
+            error_text = str(e)
 
+            # Gemini 503 = server đang quá tải
+            if (
+                "503" in error_text
+                or "UNAVAILABLE" in error_text
+                or "high demand" in error_text.lower()
+            ):
 
-    if "flashcards" not in data:
+                if attempt < max_attempts - 1:
 
-        data["flashcards"] = []
+                    time.sleep(4)
 
+                    continue
 
-    if "quiz" not in data:
+                raise RuntimeError(
+                    "Gemini đang quá tải. "
+                    "Bạn hãy thử tạo lại sau vài giây."
+                )
 
-        data["quiz"] = []
+            # Lỗi JSON
+            if isinstance(e, json.JSONDecodeError):
 
+                raise ValueError(
+                    "AI trả về dữ liệu không đúng định dạng JSON."
+                )
 
-    if "summary" not in data:
-
-        data["summary"] = (
-            "Không có phần tóm tắt."
-        )
-
-
-    if "topic" not in data:
-
-        data["topic"] = "Bài học mới"
-
-
-    return data
+            raise
