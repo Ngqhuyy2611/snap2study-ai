@@ -1,5 +1,4 @@
 import streamlit as st
-import textwrap
 from PIL import Image
 
 from ocr import extract_text
@@ -24,7 +23,7 @@ st.set_page_config(
 # CUSTOM CSS
 # =========================================================
 
-st.markdown(textwrap.dedent("""
+st.markdown("""
 <style>
 
 /* ========================================================
@@ -137,13 +136,12 @@ st.markdown(textwrap.dedent("""
    ======================================================== */
 
 .feature-card {
-    background: white;
+    background: #FFFFFF;
     border: 1px solid #EAECF0;
     border-radius: 18px;
     padding: 25px 22px;
     height: 100%;
     box-shadow: 0 5px 20px rgba(16, 24, 40, 0.04);
-    transition: all 0.2s ease;
 }
 
 .feature-icon {
@@ -197,11 +195,12 @@ st.markdown(textwrap.dedent("""
    ======================================================== */
 
 .upload-card {
-    background: white;
+    background: #FFFFFF;
     border: 2px dashed #C7C2FF;
     border-radius: 22px;
     padding: 30px;
     margin-top: 15px;
+    margin-bottom: 10px;
     box-shadow: 0 8px 28px rgba(16, 24, 40, 0.05);
 }
 
@@ -216,6 +215,7 @@ st.markdown(textwrap.dedent("""
     text-align: center;
     color: #667085;
     font-size: 14px;
+    margin-top: 6px;
 }
 
 
@@ -269,7 +269,7 @@ st.markdown(textwrap.dedent("""
 
 
 /* ========================================================
-   INFO / SUCCESS / ERROR BOXES
+   ALERT BOXES
    ======================================================== */
 
 [data-testid="stAlert"] {
@@ -284,7 +284,7 @@ st.markdown(textwrap.dedent("""
 [data-testid="stExpander"] {
     border-radius: 14px;
     border: 1px solid #EAECF0;
-    background: white;
+    background: #FFFFFF;
 }
 
 
@@ -341,6 +341,10 @@ hr {
     .snap-logo-text {
         font-size: 20px;
     }
+
+    .feature-card {
+        margin-bottom: 15px;
+    }
 }
 
 </style>
@@ -351,21 +355,14 @@ hr {
 # HEADER
 # =========================================================
 
-st.markdown(textwrap.dedent("""
+st.markdown("""
 <div class="snap-header">
-
-    <div class="snap-logo">
-
-        <div class="snap-logo-icon">
-            📚
-        </div>
-
-        <div class="snap-logo-text">
-            Snap2Study <span class="snap-logo-ai">AI</span>
-        </div>
-
-    </div>
-
+<div class="snap-logo">
+<div class="snap-logo-icon">📚</div>
+<div class="snap-logo-text">
+Snap2Study <span class="snap-logo-ai">AI</span>
+</div>
+</div>
 </div>
 """, unsafe_allow_html=True)
 
@@ -374,23 +371,21 @@ st.markdown(textwrap.dedent("""
 # HERO
 # =========================================================
 
-st.markdown(textwrap.dedent("""
+st.markdown("""
 <div class="hero-section">
+<div class="hero-badge">
+✨ AI-powered study assistant
+</div>
 
-    <div class="hero-badge">
-        ✨ AI-powered study assistant
-    </div>
+<h1 class="hero-title">
+Học thông minh hơn<br>
+cùng <span class="hero-gradient">Snap2Study AI</span>
+</h1>
 
-    <h1 class="hero-title">
-        Học thông minh hơn<br>
-        cùng <span class="hero-gradient">Snap2Study AI</span>
-    </h1>
-
-    <p class="hero-description">
-        Biến tài liệu học tập thành Flashcard và Quiz
-        bằng AI, giúp bạn ôn tập nhanh hơn và hiệu quả hơn.
-    </p>
-
+<p class="hero-description">
+Biến tài liệu học tập thành Flashcard và Quiz
+bằng AI, giúp bạn ôn tập nhanh hơn và hiệu quả hơn.
+</p>
 </div>
 """, unsafe_allow_html=True)
 
@@ -401,101 +396,92 @@ st.markdown(textwrap.dedent("""
 
 col1, col2, col3 = st.columns(3)
 
+
 with col1:
 
-    st.markdown(textwrap.dedent("""
-    <div class="feature-card">
+    st.markdown("""
+<div class="feature-card">
+<div class="feature-icon">📷</div>
 
-        <div class="feature-icon">
-            📷
-        </div>
+<div class="feature-title">
+Nhận diện tài liệu
+</div>
 
-        <div class="feature-title">
-            Nhận diện tài liệu
-        </div>
-
-        <div class="feature-text">
-            Tải ảnh bài học và để OCR
-            chuyển nội dung trong ảnh thành văn bản.
-        </div>
-
-    </div>
-    """, unsafe_allow_html=True)
+<div class="feature-text">
+Tải ảnh bài học và để OCR
+chuyển nội dung trong ảnh thành văn bản.
+</div>
+</div>
+""", unsafe_allow_html=True)
 
 
 with col2:
 
-    st.markdown(textwrap.dedent("""
-    <div class="feature-card">
+    st.markdown("""
+<div class="feature-card">
+<div class="feature-icon">🃏</div>
 
-        <div class="feature-icon">
-            🃏
-        </div>
+<div class="feature-title">
+Flashcard thông minh
+</div>
 
-        <div class="feature-title">
-            Flashcard thông minh
-        </div>
-
-        <div class="feature-text">
-            AI biến nội dung bài học thành
-            những câu hỏi và đáp án dễ ôn tập.
-        </div>
-
-    </div>
-    """, unsafe_allow_html=True)
+<div class="feature-text">
+AI biến nội dung bài học thành
+những câu hỏi và đáp án dễ ôn tập.
+</div>
+</div>
+""", unsafe_allow_html=True)
 
 
 with col3:
 
-    st.markdown(textwrap.dedent("""
-    <div class="feature-card">
+    st.markdown("""
+<div class="feature-card">
+<div class="feature-icon">❓</div>
 
-        <div class="feature-icon">
-            ❓
-        </div>
+<div class="feature-title">
+Quiz kiểm tra
+</div>
 
-        <div class="feature-title">
-            Quiz kiểm tra
-        </div>
-
-        <div class="feature-text">
-            Kiểm tra mức độ hiểu bài
-            với các câu hỏi trắc nghiệm do AI tạo.
-        </div>
-
-    </div>
-    """, unsafe_allow_html=True)
+<div class="feature-text">
+Kiểm tra mức độ hiểu bài
+với các câu hỏi trắc nghiệm do AI tạo.
+</div>
+</div>
+""", unsafe_allow_html=True)
 
 
 # =========================================================
 # UPLOAD SECTION
 # =========================================================
 
-st.markdown(textwrap.dedent("""
+st.markdown("""
 <div class="section-title">
-    🚀 Bắt đầu học
+🚀 Bắt đầu học
 </div>
 
 <div class="section-description">
-    Tải lên một trang tài liệu để Snap2Study AI tạo bộ ôn tập cho bạn.
+Tải lên một trang tài liệu để Snap2Study AI tạo bộ ôn tập cho bạn.
 </div>
 """, unsafe_allow_html=True)
 
 
-st.markdown(textwrap.dedent("""
+st.markdown("""
 <div class="upload-card">
+<div class="upload-title">
+📷 Tải tài liệu học tập
+</div>
 
-    <div class="upload-title">
-        📷 Tải tài liệu học tập
-    </div>
-
-    <div class="upload-description">
-        Chọn ảnh rõ nét của trang sách hoặc tài liệu.
-    </div>
-
+<div class="upload-description">
+Chọn ảnh rõ nét của trang sách hoặc tài liệu.
+</div>
 </div>
 """, unsafe_allow_html=True)
 
+
+# =========================================================
+# FILE UPLOADER
+# =========================================================
 
 uploaded_file = st.file_uploader(
     "Chọn ảnh bài học",
@@ -518,6 +504,7 @@ if uploaded_file:
 
     col1, col2 = st.columns([1.2, 0.8])
 
+
     with col1:
 
         st.image(
@@ -525,23 +512,24 @@ if uploaded_file:
             use_container_width=True
         )
 
+
     with col2:
 
-        st.markdown(textwrap.dedent("""
-        <div class="feature-card">
+        st.markdown("""
+<div class="feature-card">
 
-            <div class="feature-title">
-                ✨ Sẵn sàng tạo bộ ôn tập
-            </div>
+<div class="feature-title">
+✨ Sẵn sàng tạo bộ ôn tập
+</div>
 
-            <div class="feature-text">
-                Snap2Study AI sẽ đọc nội dung,
-                phân tích bài học và tạo Flashcard
-                cùng Quiz cho bạn.
-            </div>
+<div class="feature-text">
+Snap2Study AI sẽ đọc nội dung,
+phân tích bài học và tạo Flashcard
+cùng Quiz cho bạn.
+</div>
 
-        </div>
-        """, unsafe_allow_html=True)
+</div>
+""", unsafe_allow_html=True)
 
         st.write("")
 
@@ -550,11 +538,13 @@ if uploaded_file:
             use_container_width=True
         )
 
+
         if create_button:
 
             with st.spinner("🔍 Đang đọc tài liệu..."):
 
                 text = extract_text(image)
+
 
             if not text:
 
@@ -562,11 +552,13 @@ if uploaded_file:
                     "❌ Không nhận diện được nội dung trong ảnh."
                 )
 
+
             else:
 
                 with st.expander("🔎 Nội dung đã nhận diện"):
 
                     st.write(text)
+
 
                 with st.spinner(
                     "🤖 AI đang tạo Flashcard và Quiz..."
@@ -602,12 +594,16 @@ if "study_data" in st.session_state:
 
     st.divider()
 
-    # SUMMARY
 
-    st.markdown(
-        '<div class="section-title">📖 Tóm tắt bài học</div>',
-        unsafe_allow_html=True
-    )
+    # =====================================================
+    # SUMMARY
+    # =====================================================
+
+    st.markdown("""
+<div class="section-title">
+📖 Tóm tắt bài học
+</div>
+""", unsafe_allow_html=True)
 
     st.info(
         data.get(
@@ -616,7 +612,10 @@ if "study_data" in st.session_state:
         )
     )
 
+
+    # =====================================================
     # FLASHCARD
+    # =====================================================
 
     st.divider()
 
@@ -624,7 +623,10 @@ if "study_data" in st.session_state:
         data.get("flashcards", [])
     )
 
+
+    # =====================================================
     # QUIZ
+    # =====================================================
 
     st.divider()
 
@@ -637,14 +639,14 @@ if "study_data" in st.session_state:
 # FOOTER
 # =========================================================
 
-st.markdown(textwrap.dedent("""
+st.markdown("""
 <div class="snap-footer">
 
-    Made with ✨ by <strong>Snap2Study AI</strong>
+Made with ✨ by <strong>Snap2Study AI</strong>
 
-    <br>
+<br>
 
-    AI-powered learning assistant for students
+AI-powered learning assistant for students
 
 </div>
 """, unsafe_allow_html=True)
