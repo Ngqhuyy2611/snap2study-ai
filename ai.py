@@ -1,649 +1,110 @@
-import streamlit as st
-from PIL import Image
+import os
+import json
 
-from ocr import extract_text
-from ai import generate_study_material
-from flashcard import display_flashcards
-from quiz import display_quiz
+from dotenv import load_dotenv
+from google import genai
 
 
-# =========================================================
-# PAGE CONFIG
-# =========================================================
+load_dotenv()
 
-st.set_page_config(
-    page_title="Snap2Study AI",
-    page_icon="📚",
-    layout="wide",
-    initial_sidebar_state="collapsed"
+api_key = os.getenv("GEMINI_API_KEY")
+
+if not api_key:
+    raise ValueError(
+        "Không tìm thấy GEMINI_API_KEY trong file .env"
+    )
+
+client = genai.Client(
+    api_key=os.getenv("GEMINI_API_KEY")
 )
 
 
-# =========================================================
-# CUSTOM CSS
-# =========================================================
-
-st.markdown("""
-<style>
-
-/* ========================================================
-   GLOBAL
-   ======================================================== */
-
-.stApp {
-    background: #F6F8FC;
-    color: #1D2939;
-}
-
-.block-container {
-    max-width: 1150px;
-    padding-top: 2rem;
-    padding-bottom: 4rem;
-}
-
-
-/* ========================================================
-   HEADER
-   ======================================================== */
-
-.snap-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 8px 0 20px 0;
-}
-
-.snap-logo {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-.snap-logo-icon {
-    width: 42px;
-    height: 42px;
-    border-radius: 13px;
-    background: linear-gradient(135deg, #635BFF, #4F8CFF);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 23px;
-    box-shadow: 0 6px 18px rgba(99, 91, 255, 0.20);
-}
-
-.snap-logo-text {
-    font-size: 23px;
-    font-weight: 800;
-    color: #1D2939;
-    letter-spacing: -0.5px;
-}
-
-.snap-logo-ai {
-    color: #635BFF;
-}
-
-
-/* ========================================================
-   HERO
-   ======================================================== */
-
-.hero-section {
-    text-align: center;
-    padding: 55px 20px 45px 20px;
-}
-
-.hero-badge {
-    display: inline-block;
-    padding: 8px 15px;
-    border-radius: 30px;
-    background: #EEECFF;
-    color: #635BFF;
-    font-size: 14px;
-    font-weight: 700;
-    margin-bottom: 18px;
-}
-
-.hero-title {
-    font-size: 48px;
-    line-height: 1.12;
-    font-weight: 850;
-    letter-spacing: -1.8px;
-    margin: 0;
-    color: #101828;
-}
-
-.hero-gradient {
-    background: linear-gradient(
-        90deg,
-        #635BFF,
-        #4F8CFF
-    );
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-}
-
-.hero-description {
-    max-width: 650px;
-    margin: 20px auto 0 auto;
-    font-size: 18px;
-    line-height: 1.7;
-    color: #667085;
-}
-
-
-/* ========================================================
-   FEATURE CARDS
-   ======================================================== */
-
-.feature-card {
-    background: white;
-    border: 1px solid #EAECF0;
-    border-radius: 18px;
-    padding: 25px 22px;
-    height: 100%;
-    box-shadow: 0 5px 20px rgba(16, 24, 40, 0.04);
-    transition: all 0.2s ease;
-}
-
-.feature-icon {
-    width: 48px;
-    height: 48px;
-    border-radius: 14px;
-    background: #F0EEFF;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 24px;
-    margin-bottom: 16px;
-}
-
-.feature-title {
-    font-size: 18px;
-    font-weight: 750;
-    color: #1D2939;
-    margin-bottom: 7px;
-}
-
-.feature-text {
-    font-size: 14px;
-    line-height: 1.6;
-    color: #667085;
-}
-
-
-/* ========================================================
-   SECTION TITLES
-   ======================================================== */
-
-.section-title {
-    text-align: center;
-    font-size: 27px;
-    font-weight: 800;
-    color: #101828;
-    margin-top: 35px;
-    margin-bottom: 8px;
-}
-
-.section-description {
-    text-align: center;
-    color: #667085;
-    margin-bottom: 25px;
-}
-
-
-/* ========================================================
-   UPLOAD CARD
-   ======================================================== */
-
-.upload-card {
-    background: white;
-    border: 2px dashed #C7C2FF;
-    border-radius: 22px;
-    padding: 30px;
-    margin-top: 15px;
-    box-shadow: 0 8px 28px rgba(16, 24, 40, 0.05);
-}
-
-.upload-title {
-    text-align: center;
-    font-size: 21px;
-    font-weight: 750;
-    color: #1D2939;
-}
-
-.upload-description {
-    text-align: center;
-    color: #667085;
-    font-size: 14px;
-}
-
-
-/* ========================================================
-   STREAMLIT FILE UPLOADER
-   ======================================================== */
-
-[data-testid="stFileUploader"] {
-    background: transparent;
-}
-
-[data-testid="stFileUploaderDropzone"] {
-    background: #FAFAFF;
-    border: 1px dashed #B9B3FF;
-    border-radius: 15px;
-}
-
-[data-testid="stFileUploaderDropzone"]:hover {
-    border-color: #635BFF;
-    background: #F7F6FF;
-}
-
-
-/* ========================================================
-   BUTTONS
-   ======================================================== */
-
-.stButton > button {
-    border-radius: 12px;
-    border: none;
-    min-height: 46px;
-    font-weight: 700;
-    font-size: 15px;
-    transition: all 0.2s ease;
-}
-
-.stButton > button:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 6px 18px rgba(99, 91, 255, 0.18);
-}
-
-
-/* ========================================================
-   IMAGE
-   ======================================================== */
-
-[data-testid="stImage"] {
-    border-radius: 16px;
-    overflow: hidden;
-}
-
-
-/* ========================================================
-   INFO / SUCCESS / ERROR BOXES
-   ======================================================== */
-
-[data-testid="stAlert"] {
-    border-radius: 14px;
-}
-
-
-/* ========================================================
-   EXPANDER
-   ======================================================== */
-
-[data-testid="stExpander"] {
-    border-radius: 14px;
-    border: 1px solid #EAECF0;
-    background: white;
-}
-
-
-/* ========================================================
-   DIVIDER
-   ======================================================== */
-
-hr {
-    border-color: #EAECF0;
-}
-
-
-/* ========================================================
-   FOOTER
-   ======================================================== */
-
-.snap-footer {
-    text-align: center;
-    margin-top: 60px;
-    padding-top: 25px;
-    border-top: 1px solid #EAECF0;
-    color: #98A2B3;
-    font-size: 13px;
-}
-
-.snap-footer strong {
-    color: #635BFF;
-}
-
-
-/* ========================================================
-   MOBILE
-   ======================================================== */
-
-@media (max-width: 768px) {
-
-    .block-container {
-        padding-left: 1rem;
-        padding-right: 1rem;
-    }
-
-    .hero-section {
-        padding-top: 35px;
-    }
-
-    .hero-title {
-        font-size: 35px;
-    }
-
-    .hero-description {
-        font-size: 16px;
-    }
-
-    .snap-logo-text {
-        font-size: 20px;
-    }
-}
-
-</style>
-""", unsafe_allow_html=True)
-
-
-# =========================================================
-# HEADER
-# =========================================================
-
-st.markdown("""
-<div class="snap-header">
-
-    <div class="snap-logo">
-
-        <div class="snap-logo-icon">
-            📚
-        </div>
-
-        <div class="snap-logo-text">
-            Snap2Study <span class="snap-logo-ai">AI</span>
-        </div>
-
-    </div>
-
-</div>
-""", unsafe_allow_html=True)
-
-
-# =========================================================
-# HERO
-# =========================================================
-
-st.markdown("""
-<div class="hero-section">
-
-    <div class="hero-badge">
-        ✨ AI-powered study assistant
-    </div>
-
-    <h1 class="hero-title">
-        Học thông minh hơn<br>
-        cùng <span class="hero-gradient">Snap2Study AI</span>
-    </h1>
-
-    <p class="hero-description">
-        Biến tài liệu học tập thành Flashcard và Quiz
-        bằng AI, giúp bạn ôn tập nhanh hơn và hiệu quả hơn.
-    </p>
-
-</div>
-""", unsafe_allow_html=True)
-
-
-# =========================================================
-# FEATURES
-# =========================================================
-
-col1, col2, col3 = st.columns(3)
-
-with col1:
-
-    st.markdown("""
-    <div class="feature-card">
-
-        <div class="feature-icon">
-            📷
-        </div>
-
-        <div class="feature-title">
-            Nhận diện tài liệu
-        </div>
-
-        <div class="feature-text">
-            Tải ảnh bài học và để OCR
-            chuyển nội dung trong ảnh thành văn bản.
-        </div>
-
-    </div>
-    """, unsafe_allow_html=True)
-
-
-with col2:
-
-    st.markdown("""
-    <div class="feature-card">
-
-        <div class="feature-icon">
-            🃏
-        </div>
-
-        <div class="feature-title">
-            Flashcard thông minh
-        </div>
-
-        <div class="feature-text">
-            AI biến nội dung bài học thành
-            những câu hỏi và đáp án dễ ôn tập.
-        </div>
-
-    </div>
-    """, unsafe_allow_html=True)
-
-
-with col3:
-
-    st.markdown("""
-    <div class="feature-card">
-
-        <div class="feature-icon">
-            ❓
-        </div>
-
-        <div class="feature-title">
-            Quiz kiểm tra
-        </div>
-
-        <div class="feature-text">
-            Kiểm tra mức độ hiểu bài
-            với các câu hỏi trắc nghiệm do AI tạo.
-        </div>
-
-    </div>
-    """, unsafe_allow_html=True)
-
-
-# =========================================================
-# UPLOAD SECTION
-# =========================================================
-
-st.markdown("""
-<div class="section-title">
-    🚀 Bắt đầu học
-</div>
-
-<div class="section-description">
-    Tải lên một trang tài liệu để Snap2Study AI tạo bộ ôn tập cho bạn.
-</div>
-""", unsafe_allow_html=True)
-
-
-st.markdown("""
-<div class="upload-card">
-
-    <div class="upload-title">
-        📷 Tải tài liệu học tập
-    </div>
-
-    <div class="upload-description">
-        Chọn ảnh rõ nét của trang sách hoặc tài liệu.
-    </div>
-
-</div>
-""", unsafe_allow_html=True)
-
-
-uploaded_file = st.file_uploader(
-    "Chọn ảnh bài học",
-    type=["jpg", "jpeg", "png"],
-    label_visibility="collapsed"
-)
-
-
-# =========================================================
-# PROCESS IMAGE
-# =========================================================
-
-if uploaded_file:
-
-    image = Image.open(uploaded_file)
-
-    st.write("")
-
-    st.subheader("📄 Tài liệu của bạn")
-
-    col1, col2 = st.columns([1.2, 0.8])
-
-    with col1:
-
-        st.image(
-            image,
-            use_container_width=True
+def generate_study_material(text, number_of_cards=5):
+
+    prompt = f"""
+Bạn là Snap2Study AI, một trợ lý học tập dành cho học sinh THPT.
+
+Hãy đọc tài liệu dưới đây và tạo một bộ ôn tập.
+
+YÊU CẦU:
+
+1. Xác định chủ đề chính.
+2. Tạo một phần tóm tắt ngắn, dễ hiểu.
+3. Tạo {number_of_cards} flashcard.
+4. Mỗi flashcard gồm:
+   - question
+   - answer
+   - difficulty
+5. Tạo 5 câu hỏi trắc nghiệm.
+6. Mỗi câu có 4 lựa chọn A, B, C, D.
+7. Chỉ sử dụng kiến thức có trong tài liệu.
+8. Không tự bịa thêm kiến thức.
+9. Nội dung phù hợp với học sinh THPT.
+
+CHỈ TRẢ VỀ JSON.
+
+Cấu trúc JSON:
+
+{{
+    "topic": "Tên chủ đề",
+
+    "summary": "Tóm tắt ngắn gọn nội dung",
+
+    "flashcards": [
+        {{
+            "question": "Câu hỏi",
+            "answer": "Câu trả lời",
+            "difficulty": "Dễ"
+        }}
+    ],
+
+    "quiz": [
+        {{
+            "question": "Câu hỏi trắc nghiệm",
+            "options": [
+                "A. Đáp án A",
+                "B. Đáp án B",
+                "C. Đáp án C",
+                "D. Đáp án D"
+            ],
+            "answer": "A"
+        }}
+    ]
+}}
+
+TÀI LIỆU:
+
+{text}
+"""
+
+    # LƯU Ý: "gemini-3.6-flash" không phải tên model chuẩn của Gemini API.
+    # Hãy chạy list_models.py để lấy danh sách model thật sự khả dụng
+    # với API key của bạn (vd: "gemini-2.0-flash", "gemini-1.5-flash", ...)
+    # rồi thay giá trị bên dưới cho đúng.
+    response = client.models.generate_content(
+        model="gemini-3.6-flash",
+        contents=prompt
+    )
+
+    result = response.text.strip()
+
+    # Loại bỏ markdown nếu Gemini trả về ```json
+    if result.startswith("```json"):
+        result = result[7:]
+
+    if result.startswith("```"):
+        result = result[3:]
+
+    if result.endswith("```"):
+        result = result[:-3]
+
+    result = result.strip()
+
+    try:
+        return json.loads(result)
+
+    except json.JSONDecodeError:
+        raise ValueError(
+            "Gemini không trả về JSON hợp lệ.\n\n"
+            f"Kết quả Gemini trả về:\n{result}"
         )
-
-    with col2:
-
-        st.markdown("""
-        <div class="feature-card">
-
-            <div class="feature-title">
-                ✨ Sẵn sàng tạo bộ ôn tập
-            </div>
-
-            <div class="feature-text">
-                Snap2Study AI sẽ đọc nội dung,
-                phân tích bài học và tạo Flashcard
-                cùng Quiz cho bạn.
-            </div>
-
-        </div>
-        """, unsafe_allow_html=True)
-
-        st.write("")
-
-        create_button = st.button(
-            "✨ Tạo bộ ôn tập",
-            use_container_width=True
-        )
-
-        if create_button:
-
-            with st.spinner("🔍 Đang đọc tài liệu..."):
-
-                text = extract_text(image)
-
-            if not text:
-
-                st.error(
-                    "❌ Không nhận diện được nội dung trong ảnh."
-                )
-
-            else:
-
-                with st.expander("🔎 Nội dung đã nhận diện"):
-
-                    st.write(text)
-
-                with st.spinner(
-                    "🤖 AI đang tạo Flashcard và Quiz..."
-                ):
-
-                    try:
-
-                        study_data = generate_study_material(
-                            text,
-                            number_of_cards=5
-                        )
-
-                        st.session_state.study_data = study_data
-
-                        st.success(
-                            "🎉 Đã tạo bộ ôn tập thành công!"
-                        )
-
-                    except Exception as e:
-
-                        st.error(
-                            f"❌ Có lỗi khi gọi AI: {e}"
-                        )
-
-
-# =========================================================
-# STUDY RESULTS
-# =========================================================
-
-if "study_data" in st.session_state:
-
-    data = st.session_state.study_data
-
-    st.divider()
-
-    # SUMMARY
-
-    st.markdown(
-        '<div class="section-title">📖 Tóm tắt bài học</div>',
-        unsafe_allow_html=True
-    )
-
-    st.info(
-        data.get(
-            "summary",
-            "Không có phần tóm tắt."
-        )
-    )
-
-    # FLASHCARD
-
-    st.divider()
-
-    display_flashcards(
-        data.get("flashcards", [])
-    )
-
-    # QUIZ
-
-    st.divider()
-
-    display_quiz(
-        data.get("quiz", [])
-    )
-
-
-# =========================================================
-# FOOTER
-# =========================================================
-
-st.markdown("""
-<div class="snap-footer">
-
-    Made with ✨ by <strong>Snap2Study AI</strong>
-
-    <br>
-
-    AI-powered learning assistant for students
-
-</div>
-""", unsafe_allow_html=True)
