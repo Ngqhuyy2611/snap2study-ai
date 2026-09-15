@@ -101,28 +101,41 @@ def display_flashcards(
    ========================================================= */
 
 .snap-card {
-    width: 100%;
     min-height: 335px;
-    box-sizing: border-box;
+
+    padding: 34px;
 
     border-radius: 28px;
 
-    padding: 42px 45px;
+    border: 2px solid #D9D6FF;
+
+    background: #FFFFFF;
+
+    box-shadow:
+        0 12px 30px rgba(16, 24, 40, 0.10),
+        0 3px 8px rgba(99, 91, 255, 0.08);
 
     display: flex;
     flex-direction: column;
-    align-items: center;
     justify-content: center;
-
-    text-align: center;
 
     position: relative;
 
-    margin: 22px 0 24px 0;
+    overflow: hidden;
+
+    margin: 12px 0 20px 0;
+
+    transition:
+        transform 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+.snap-card:hover {
+    transform: translateY(-2px);
 
     box-shadow:
-        0 20px 45px rgba(67, 56, 202, 0.16),
-        0 6px 18px rgba(16, 24, 40, 0.08);
+        0 18px 38px rgba(16, 24, 40, 0.13),
+        0 5px 14px rgba(99, 91, 255, 0.10);
 }
 
 
