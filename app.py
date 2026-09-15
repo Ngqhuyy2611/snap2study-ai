@@ -29,10 +29,16 @@ defaults = {
     "study_data": None,
     "history": [],
     "review_cards": [],
+
+    # Main Flashcard
     "main_flashcard_index": 0,
     "main_flashcard_flipped": False,
+
+    # Review Flashcard
     "review_flashcard_index": 0,
     "review_flashcard_flipped": False,
+
+    # Quiz
     "quiz_submitted": False,
     "quiz_score": 0,
     "quiz_total": 0,
@@ -41,50 +47,379 @@ defaults = {
 }
 
 for key, value in defaults.items():
-
     if key not in st.session_state:
-
         st.session_state[key] = value
 
 
 # =========================================================
 # GLOBAL STYLE
 # =========================================================
+#
+# Mục tiêu:
+# - Giữ giao diện sáng
+# - Không để dark mode làm mất chữ
+# - Làm các container có border rõ hơn
+# - Không dùng CSS toàn cục kiểu "* { color: ... }"
+#   để tránh phá Flashcard / Quiz
+#
 
 st.markdown(
     """
 <style>
 
+/* =====================================================
+   BASE
+   ===================================================== */
+
 .stApp {
-    background: #F6F8FC;
+    background: #F6F8FC !important;
+    color: #101828 !important;
 }
 
 .block-container {
-    max-width: 1150px;
-    padding-top: 2rem;
-    padding-bottom: 4rem;
+    max-width: 1150px !important;
+    padding-top: 2rem !important;
+    padding-bottom: 4rem !important;
 }
 
+
+/* =====================================================
+   MAIN TEXT
+   ===================================================== */
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    color: #101828 !important;
+}
+
+p,
+li {
+    color: #344054;
+}
+
+[data-testid="stCaptionContainer"] {
+    color: #667085 !important;
+}
+
+
+/* =====================================================
+   SIDEBAR
+   ===================================================== */
+
+[data-testid="stSidebar"] {
+    background: #FFFFFF !important;
+    border-right: 1px solid #E4E7EC !important;
+}
+
+[data-testid="stSidebar"] h1,
+[data-testid="stSidebar"] h2,
+[data-testid="stSidebar"] h3,
+[data-testid="stSidebar"] h4 {
+    color: #101828 !important;
+}
+
+[data-testid="stSidebar"] p,
+[data-testid="stSidebar"] label,
+[data-testid="stSidebar"] span {
+    color: #344054 !important;
+}
+
+
+/* =====================================================
+   SIDEBAR HISTORY BUTTON
+   ===================================================== */
+
+[data-testid="stSidebar"] .stButton > button {
+    background: #FFFFFF !important;
+    color: #344054 !important;
+
+    border: 1px solid #E4E7EC !important;
+    border-radius: 12px !important;
+
+    min-height: 42px !important;
+
+    text-align: left !important;
+
+    box-shadow:
+        0 2px 6px rgba(16, 24, 40, 0.04) !important;
+
+    transition: all 0.18s ease !important;
+}
+
+[data-testid="stSidebar"] .stButton > button:hover {
+    background: #F7F6FF !important;
+    color: #5146D8 !important;
+
+    border-color: #B8B3FF !important;
+
+    transform: translateY(-1px);
+}
+
+
+/* =====================================================
+   NORMAL BUTTON
+   ===================================================== */
+
 .stButton > button {
-    border-radius: 12px;
-    min-height: 45px;
-    font-weight: 700;
+    border-radius: 12px !important;
+
+    min-height: 45px !important;
+
+    font-weight: 700 !important;
+
+    background: #FFFFFF !important;
+    color: #344054 !important;
+
+    border: 1px solid #D0D5DD !important;
+
+    box-shadow:
+        0 1px 2px rgba(16, 24, 40, 0.05) !important;
+
+    transition:
+        all 0.18s ease !important;
+}
+
+.stButton > button:hover {
+    background: #F8F7FF !important;
+
+    color: #5146D8 !important;
+
+    border-color: #8B82FF !important;
+
+    box-shadow:
+        0 5px 14px rgba(99, 91, 255, 0.12) !important;
+
+    transform: translateY(-1px);
+}
+
+
+/* =====================================================
+   PRIMARY BUTTON
+   ===================================================== */
+
+.stButton > button[kind="primary"] {
+    background: linear-gradient(
+        135deg,
+        #635BFF 0%,
+        #7C6FFF 100%
+    ) !important;
+
+    color: #FFFFFF !important;
+
+    border: none !important;
+
+    box-shadow:
+        0 7px 18px rgba(99, 91, 255, 0.25) !important;
+}
+
+.stButton > button[kind="primary"]:hover {
+    background: linear-gradient(
+        135deg,
+        #574FE8 0%,
+        #7062F5 100%
+    ) !important;
+
+    color: #FFFFFF !important;
+
+    border: none !important;
+
+    box-shadow:
+        0 9px 24px rgba(99, 91, 255, 0.32) !important;
+
+    transform: translateY(-1px);
+}
+
+
+/* =====================================================
+   FILE UPLOADER
+   ===================================================== */
+
+[data-testid="stFileUploader"] {
+    color: #344054 !important;
 }
 
 [data-testid="stFileUploaderDropzone"] {
-    background: #FAFAFF;
-    border: 1px dashed #B9B3FF;
-    border-radius: 15px;
+    background: #FFFFFF !important;
+
+    border: 2px dashed #B8B3FF !important;
+
+    border-radius: 18px !important;
+
+    box-shadow:
+        0 4px 14px rgba(16, 24, 40, 0.05) !important;
+
+    transition: all 0.18s ease !important;
 }
 
 [data-testid="stFileUploaderDropzone"]:hover {
-    border-color: #635BFF;
-    background: #F7F6FF;
+    background: #F9F8FF !important;
+
+    border-color: #635BFF !important;
+
+    box-shadow:
+        0 7px 18px rgba(99, 91, 255, 0.10) !important;
 }
 
-[data-testid="stAlert"] {
-    border-radius: 14px;
+[data-testid="stFileUploaderDropzone"] p,
+[data-testid="stFileUploaderDropzone"] span {
+    color: #344054 !important;
 }
+
+
+/* =====================================================
+   INPUT
+   ===================================================== */
+
+[data-baseweb="input"] {
+    background: #FFFFFF !important;
+    border-radius: 12px !important;
+}
+
+[data-baseweb="input"] input {
+    background: #FFFFFF !important;
+    color: #101828 !important;
+}
+
+textarea {
+    background: #FFFFFF !important;
+    color: #101828 !important;
+}
+
+
+/* =====================================================
+   RADIO
+   ===================================================== */
+
+[data-testid="stRadio"] label {
+    color: #344054 !important;
+}
+
+[data-testid="stRadio"] p {
+    color: #344054 !important;
+}
+
+
+/* =====================================================
+   CHECKBOX
+   ===================================================== */
+
+[data-testid="stCheckbox"] label {
+    color: #344054 !important;
+}
+
+
+/* =====================================================
+   EXPANDER
+   ===================================================== */
+
+[data-testid="stExpander"] {
+    background: #FFFFFF !important;
+
+    border: 1px solid #DDE1E8 !important;
+
+    border-radius: 16px !important;
+
+    box-shadow:
+        0 3px 10px rgba(16, 24, 40, 0.04) !important;
+}
+
+[data-testid="stExpander"] p {
+    color: #344054 !important;
+}
+
+
+/* =====================================================
+   ALERT
+   ===================================================== */
+
+[data-testid="stAlert"] {
+    border-radius: 14px !important;
+}
+
+
+/* =====================================================
+   STREAMLIT CONTAINER BORDER
+   ===================================================== */
+
+[data-testid="stVerticalBlockBorderWrapper"] {
+    border-color: #DDE1E8 !important;
+
+    border-radius: 18px !important;
+
+    background: #FFFFFF !important;
+
+    box-shadow:
+        0 4px 12px rgba(16, 24, 40, 0.04) !important;
+}
+
+
+/* =====================================================
+   DIVIDER
+   ===================================================== */
+
+hr {
+    border-color: #E4E7EC !important;
+}
+
+
+/* =====================================================
+   PROGRESS BAR
+   ===================================================== */
+
+[data-testid="stProgressBar"] {
+    background: #E4E7EC !important;
+}
+
+
+/* =====================================================
+   IMAGE
+   ===================================================== */
+
+[data-testid="stImage"] img {
+    border-radius: 18px !important;
+
+    border: 1px solid #E4E7EC !important;
+
+    box-shadow:
+        0 6px 18px rgba(16, 24, 40, 0.07) !important;
+}
+
+
+/* =====================================================
+   TABLE / DATAFRAME
+   ===================================================== */
+
+[data-testid="stDataFrame"] {
+    border-radius: 14px !important;
+
+    overflow: hidden !important;
+}
+
+
+/* =====================================================
+   SMOOTH
+   ===================================================== */
+
+html {
+    scroll-behavior: smooth;
+}
+
+
+/* =====================================================
+   IMPORTANT
+   =====================================================
+
+   KHÔNG dùng:
+       * { color: ... }
+
+   vì Flashcard và Quiz có CSS riêng.
+   Nếu ép màu toàn bộ phần tử, giao diện card
+   sẽ bị phá hoặc chữ bị chìm.
+   ===================================================== */
 
 </style>
 """,
@@ -144,15 +479,20 @@ with st.sidebar:
                     item["data"]
                 )
 
+                # Reset main Flashcard
                 st.session_state.main_flashcard_index = 0
                 st.session_state.main_flashcard_flipped = False
 
+                # Reset review Flashcard
                 st.session_state.review_flashcard_index = 0
                 st.session_state.review_flashcard_flipped = False
-
                 st.session_state.review_cards = []
 
+                # Reset Quiz
                 st.session_state.quiz_submitted = False
+                st.session_state.quiz_score = 0
+                st.session_state.quiz_total = 0
+                st.session_state.quiz_percentage = 0
                 st.session_state.quiz_answers = []
 
                 st.rerun()
@@ -245,6 +585,7 @@ st.caption(
     "tạo bộ ôn tập cho bạn."
 )
 
+
 uploaded_file = st.file_uploader(
     "📷 Chọn ảnh bài học",
     type=[
@@ -302,6 +643,11 @@ if uploaded_file:
                 type="primary"
             )
 
+
+    # =====================================================
+    # CREATE STUDY SET
+    # =====================================================
+
     if create_button:
 
         # =================================================
@@ -328,6 +674,7 @@ if uploaded_file:
 
                 text = ""
 
+
         if not text:
 
             st.error(
@@ -337,11 +684,16 @@ if uploaded_file:
 
         else:
 
+            # =============================================
+            # OCR PREVIEW
+            # =============================================
+
             with st.expander(
                 "🔎 Xem nội dung OCR"
             ):
 
                 st.write(text)
+
 
             # =============================================
             # GEMINI
@@ -361,46 +713,73 @@ if uploaded_file:
                         )
                     )
 
+
+                    # =====================================
+                    # SAVE STUDY DATA
+                    # =====================================
+
                     st.session_state.study_data = (
                         study_data
                     )
 
-                    # Reset Flashcard
+
+                    # =====================================
+                    # RESET MAIN FLASHCARD
+                    # =====================================
+
                     st.session_state.main_flashcard_index = 0
                     st.session_state.main_flashcard_flipped = False
 
-                    # Reset review
+
+                    # =====================================
+                    # RESET REVIEW
+                    # =====================================
+
                     st.session_state.review_cards = []
+
                     st.session_state.review_flashcard_index = 0
                     st.session_state.review_flashcard_flipped = False
 
-                    # Reset Quiz
+
+                    # =====================================
+                    # RESET QUIZ
+                    # =====================================
+
                     st.session_state.quiz_submitted = False
+
                     st.session_state.quiz_score = 0
                     st.session_state.quiz_total = 0
                     st.session_state.quiz_percentage = 0
+
                     st.session_state.quiz_answers = []
+
 
                     # =====================================
                     # HISTORY
                     # =====================================
 
                     history_item = {
+
                         "topic": study_data.get(
                             "topic",
                             "Bài học mới"
                         ),
+
                         "time": datetime.now().strftime(
                             "%d/%m/%Y %H:%M"
                         ),
+
                         "data": study_data
                     }
+
 
                     st.session_state.history.append(
                         history_item
                     )
 
-                    # Chỉ giữ 10 bài
+
+                    # Chỉ giữ 10 bài gần nhất
+
                     if len(
                         st.session_state.history
                     ) > 10:
@@ -409,17 +788,21 @@ if uploaded_file:
                             st.session_state.history[-10:]
                         )
 
+
                     st.success(
                         "🎉 Đã tạo bộ ôn tập thành công!"
                     )
+
 
                 except Exception as e:
 
                     error_text = str(e)
 
+
                     if (
                         "503" in error_text
                         or "UNAVAILABLE" in error_text
+                        or "high demand" in error_text.lower()
                     ):
 
                         st.warning(
@@ -445,6 +828,7 @@ if st.session_state.study_data:
 
     st.divider()
 
+
     # =====================================================
     # SUMMARY
     # =====================================================
@@ -462,6 +846,7 @@ if st.session_state.study_data:
             )
         )
 
+
     # =====================================================
     # FLASHCARDS
     # =====================================================
@@ -473,9 +858,12 @@ if st.session_state.study_data:
             "flashcards",
             []
         ),
+
         title="🃏 Flashcard",
+
         state_prefix="main"
     )
+
 
     # =====================================================
     # QUIZ
@@ -489,6 +877,7 @@ if st.session_state.study_data:
             []
         )
     )
+
 
     # =====================================================
     # REVIEW
@@ -509,7 +898,9 @@ if st.session_state.study_data:
 
         display_flashcards(
             st.session_state.review_cards,
+
             title="🔁 Flashcard ôn lại",
+
             state_prefix="review"
         )
 
