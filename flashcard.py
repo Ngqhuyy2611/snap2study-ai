@@ -165,40 +165,18 @@ def display_flashcards(
 
 .snap-card-answer {
     background:
-        radial-gradient(
-            circle at top right,
-            rgba(52, 211, 153, 0.22),
-            transparent 35%
-        ),
         linear-gradient(
             135deg,
-            #effcf6 0%,
-            #eef8ff 100%
-        );
+            #FFFFFF 0%,
+            #F4FBF9 100%
+        ) !important;
 
-    border: 1px solid #bcebd3;
+    border: 2px solid #9DDDD0 !important;
 
     box-shadow:
-        0 20px 45px rgba(16, 185, 129, 0.13),
-        0 6px 18px rgba(16, 24, 40, 0.07);
+        0 14px 34px rgba(52, 168, 148, 0.12),
+        0 3px 8px rgba(16, 24, 40, 0.06) !important;
 }
-
-
-/* =========================================================
-   CARD NUMBER
-   ========================================================= */
-
-.snap-card-number {
-    color: #667085;
-    font-size: 12px;
-    font-weight: 800;
-    letter-spacing: 1.5px;
-
-    margin-bottom: 17px;
-
-    text-transform: uppercase;
-}
-
 
 /* =========================================================
    BADGES
