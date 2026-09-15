@@ -656,6 +656,7 @@ cùng Quiz cho bạn.
                         study_data = generate_study_material(
                             text,
                             number_of_cards=5
+                            number_of_quiz=5
                         )
 
                         st.session_state.study_data = study_data
@@ -744,7 +745,8 @@ if st.session_state.study_data:
     st.divider()
 
     display_flashcards(
-        data.get("flashcards", [])
+        data.get("flashcards", []),
+        state_prefix="main"
     )
 
 
@@ -781,6 +783,7 @@ Flashcard để ôn lại.
         display_flashcards(
             st.session_state.review_cards,
             title="🔁 Flashcard ôn lại"
+            state_prefix="review"
         )
 
 
