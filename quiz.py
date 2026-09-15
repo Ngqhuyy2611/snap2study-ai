@@ -4,172 +4,44 @@ import streamlit as st
 def display_quiz(quiz):
 
     if not quiz:
-        st.warning("Chưa có câu hỏi Quiz.")
+
+        st.warning(
+            "Chưa có câu hỏi Quiz."
+        )
+
         return
-
-    # =====================================================
-    # CSS
-    # =====================================================
-
-    st.markdown(
-        """
-<style>
-
-.quiz-title {
-    text-align: center;
-
-    color: #101828;
-
-    font-size: 28px;
-    font-weight: 800;
-
-    margin-top: 25px;
-    margin-bottom: 5px;
-}
-
-.quiz-subtitle {
-    text-align: center;
-
-    color: #667085;
-
-    font-size: 14px;
-
-    margin-bottom: 25px;
-}
-
-.quiz-question-card {
-    background:
-        linear-gradient(
-            135deg,
-            #F8F7FF 0%,
-            #F2F6FF 100%
-        );
-
-    border: 1px solid #DDD9FF;
-
-    border-radius: 20px;
-
-    padding: 22px 24px;
-
-    margin: 18px 0 10px 0;
-
-    box-shadow:
-        0 8px 25px rgba(16, 24, 40, 0.07);
-}
-
-.quiz-number {
-    display: inline-block;
-
-    padding: 6px 13px;
-
-    border-radius: 999px;
-
-    background: #E9E7FF;
-
-    color: #5146D8;
-
-    font-size: 12px;
-    font-weight: 800;
-
-    margin-bottom: 12px;
-}
-
-.quiz-question-text {
-    color: #101828;
-
-    font-size: 18px;
-    font-weight: 700;
-
-    line-height: 1.55;
-}
-
-.quiz-result-card {
-    background:
-        linear-gradient(
-            135deg,
-            #F5F3FF,
-            #EEF4FF
-        );
-
-    border: 1px solid #DDD9FF;
-
-    border-radius: 24px;
-
-    padding: 30px;
-
-    text-align: center;
-
-    margin: 25px 0;
-
-    box-shadow:
-        0 12px 35px rgba(16, 24, 40, 0.08);
-}
-
-.quiz-result-label {
-    color: #667085;
-
-    font-size: 14px;
-    font-weight: 700;
-}
-
-.quiz-score {
-    color: #5146D8;
-
-    font-size: 50px;
-    font-weight: 900;
-
-    margin: 5px 0;
-}
-
-.quiz-percent {
-    color: #344054;
-
-    font-size: 17px;
-    font-weight: 700;
-}
-
-.quiz-detail-title {
-    color: #101828;
-
-    font-size: 20px;
-    font-weight: 800;
-
-    margin-top: 25px;
-    margin-bottom: 15px;
-}
-
-</style>
-        """,
-        unsafe_allow_html=True
-    )
 
     # =====================================================
     # HEADER
     # =====================================================
 
-    st.markdown(
-        """
-<div class="quiz-title">
-    ❓ Quiz
-</div>
+    st.markdown("## ❓ Quiz")
 
-<div class="quiz-subtitle">
-    Kiểm tra mức độ hiểu bài của bạn
-</div>
-        """,
-        unsafe_allow_html=True
+    st.caption(
+        "Kiểm tra mức độ hiểu bài của bạn."
     )
 
-    st.progress(
-        0,
-        text=f"📝 {len(quiz)} câu hỏi"
-    )
+    # =====================================================
+    # QUIZ STATE
+    # =====================================================
+
+    if "quiz_submitted" not in st.session_state:
+        st.session_state.quiz_submitted = False
+
+    if "quiz_score" not in st.session_state:
+        st.session_state.quiz_score = 0
+
+    if "quiz_total" not in st.session_state:
+        st.session_state.quiz_total = len(quiz)
+
+    if "quiz_percentage" not in st.session_state:
+        st.session_state.quiz_percentage = 0
 
     # =====================================================
     # FORM
     # =====================================================
 
-    with st.form("quiz_form"):
+    with st.form("snap2study_quiz_form"):
 
         answers = []
 
@@ -182,58 +54,49 @@ def display_quiz(quiz):
                 )
             )
 
-            st.markdown(
-                f"""
-<div class="quiz-question-card">
-
-<div class="quiz-number">
-❓ CÂU {i + 1}
-</div>
-
-<div class="quiz-question-text">
-{question_text}
-</div>
-
-</div>
-                """,
-                unsafe_allow_html=True
-            )
-
             options = question.get(
                 "options",
                 []
             )
 
-            selected = st.radio(
-                "Chọn đáp án:",
-                options,
-                key=f"quiz_{i}",
-                index=None
-            )
+            # Khung câu hỏi
+            with st.container(border=True):
 
-            answers.append(selected)
+                st.markdown(
+                    f"### 🟣 Câu {i + 1}"
+                )
 
-        st.write("")
+                st.markdown(
+                    f"**{question_text}**"
+                )
+
+                st.write("")
+
+                selected = st.radio(
+                    "Chọn đáp án:",
+                    options,
+                    key=f"snap_quiz_{i}",
+                    index=None
+                )
+
+                answers.append(selected)
+
+            st.write("")
 
         submitted = st.form_submit_button(
-            "📝  Nộp bài",
+            "📝 Nộp bài",
             use_container_width=True,
             type="primary"
         )
 
     # =====================================================
-    # RESULT
+    # CALCULATE RESULT
     # =====================================================
 
     if submitted:
 
         score = 0
-
         wrong_questions = []
-
-        # =================================================
-        # CHECK ANSWERS
-        # =================================================
 
         for i, question in enumerate(quiz):
 
@@ -246,11 +109,17 @@ def display_quiz(quiz):
                 )
             ).strip().upper()
 
+            correct_text = str(
+                question.get(
+                    "correct_answer",
+                    correct
+                )
+            )
+
             if selected:
 
                 selected_letter = (
-                    str(selected)[0]
-                    .upper()
+                    str(selected).strip()[0].upper()
                 )
 
                 if selected_letter == correct:
@@ -260,81 +129,67 @@ def display_quiz(quiz):
                 else:
 
                     wrong_questions.append({
-
                         "question": question.get(
                             "question",
                             ""
                         ),
-
-                        "answer": question.get(
-                            "correct_answer",
-                            correct
-                        ),
-
+                        "answer": correct_text,
                         "difficulty": "Cần ôn lại"
-
                     })
 
             else:
 
                 wrong_questions.append({
-
                     "question": question.get(
                         "question",
                         ""
                     ),
-
-                    "answer": question.get(
-                        "correct_answer",
-                        correct
-                    ),
-
+                    "answer": correct_text,
                     "difficulty": "Cần ôn lại"
-
                 })
 
         total = len(quiz)
 
         percentage = int(
             score / total * 100
-        )
+        ) if total else 0
 
-        # =================================================
-        # SAVE RESULT
-        # =================================================
-
+        # Lưu kết quả
+        st.session_state.quiz_submitted = True
         st.session_state.quiz_score = score
-
         st.session_state.quiz_total = total
-
         st.session_state.quiz_percentage = percentage
-
         st.session_state.review_cards = wrong_questions
 
-        # =================================================
-        # RESULT CARD
-        # =================================================
+        st.session_state.quiz_answers = answers
 
-        st.markdown(
-            f"""
-<div class="quiz-result-card">
+    # =====================================================
+    # SHOW RESULT
+    # =====================================================
 
-<div class="quiz-result-label">
-🎯 KẾT QUẢ CỦA BẠN
-</div>
+    if st.session_state.quiz_submitted:
 
-<div class="quiz-score">
-{score} / {total}
-</div>
+        score = st.session_state.quiz_score
+        total = st.session_state.quiz_total
+        percentage = st.session_state.quiz_percentage
 
-<div class="quiz-percent">
-{percentage}% chính xác
-</div>
+        st.write("")
 
-</div>
-            """,
-            unsafe_allow_html=True
-        )
+        # Điểm
+        with st.container(border=True):
+
+            st.markdown(
+                "### 🎯 Kết quả của bạn"
+            )
+
+            st.markdown(
+                f"# {score} / {total}"
+            )
+
+            st.progress(
+                percentage / 100,
+                text=f"📊 Độ chính xác: {percentage}%"
+            )
 
         # =================================================
         # MESSAGE
@@ -348,44 +203,44 @@ def display_quiz(quiz):
 
         elif percentage >= 50:
 
-            st.warning(
+            st.info(
                 "👍 Khá tốt! Hãy ôn thêm những phần còn chưa chắc."
             )
 
         else:
 
-            st.error(
+            st.warning(
                 "📖 Đừng lo! Hãy xem lại bài và thử lại nhé."
             )
-
-        st.progress(
-            percentage / 100,
-            text=f"📊 Độ chính xác: {percentage}%"
-        )
 
         # =================================================
         # REVIEW
         # =================================================
 
+        wrong_questions = (
+            st.session_state.review_cards
+        )
+
         if wrong_questions:
 
-            st.markdown(
-                """
-<div class="quiz-detail-title">
-💡 Gợi ý ôn lại
-</div>
-                """,
-                unsafe_allow_html=True
-            )
+            st.write("")
 
-            st.info(
-                f"Bạn có **{len(wrong_questions)} câu cần ôn lại**."
-            )
+            with st.container(border=True):
 
-            st.success(
-                "🃏 Những câu chưa đúng đã được chuyển "
-                "thành Flashcard để bạn ôn lại bên dưới."
-            )
+                st.markdown(
+                    "### 🔁 Gợi ý ôn lại"
+                )
+
+                st.write(
+                    f"Bạn có **{len(wrong_questions)} "
+                    f"câu cần ôn lại**."
+                )
+
+                st.info(
+                    "🃏 Những câu chưa đúng sẽ được "
+                    "chuyển thành Flashcard ở phần "
+                    "**Ôn lại phần chưa chắc**."
+                )
 
         else:
 
@@ -394,21 +249,27 @@ def display_quiz(quiz):
             )
 
         # =================================================
-        # DETAIL
+        # DETAILED RESULT
         # =================================================
 
+        st.write("")
+
         st.markdown(
-            """
-<div class="quiz-detail-title">
-📋 Kết quả chi tiết
-</div>
-            """,
-            unsafe_allow_html=True
+            "### 📋 Kết quả chi tiết"
+        )
+
+        saved_answers = st.session_state.get(
+            "quiz_answers",
+            []
         )
 
         for i, question in enumerate(quiz):
 
-            selected = answers[i]
+            selected = (
+                saved_answers[i]
+                if i < len(saved_answers)
+                else None
+            )
 
             correct = str(
                 question.get(
@@ -417,39 +278,35 @@ def display_quiz(quiz):
                 )
             ).strip().upper()
 
+            correct_text = str(
+                question.get(
+                    "correct_answer",
+                    correct
+                )
+            )
+
             if selected:
 
                 selected_letter = (
-                    str(selected)[0]
-                    .upper()
+                    str(selected).strip()[0].upper()
                 )
 
                 if selected_letter == correct:
 
                     st.success(
-                        f"Câu {i + 1}: ✅ Chính xác"
+                        f"**Câu {i + 1}:** ✅ Chính xác"
                     )
 
                 else:
 
-                    correct_text = question.get(
-                        "correct_answer",
-                        correct
-                    )
-
                     st.error(
-                        f"Câu {i + 1}: ❌ Sai — "
-                        f"Đáp án đúng: {correct_text}"
+                        f"**Câu {i + 1}:** ❌ Sai\n\n"
+                        f"Đáp án đúng: **{correct_text}**"
                     )
 
             else:
 
-                correct_text = question.get(
-                    "correct_answer",
-                    correct
-                )
-
                 st.warning(
-                    f"Câu {i + 1}: ⚪ Chưa trả lời — "
-                    f"Đáp án đúng: {correct_text}"
+                    f"**Câu {i + 1}:** ⚪ Chưa trả lời\n\n"
+                    f"Đáp án đúng: **{correct_text}**"
                 )
