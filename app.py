@@ -504,15 +504,308 @@ with st.sidebar:
 # HEADER
 # =========================================================
 
+# =========================
+# HOMEPAGE HERO
+# =========================
+
 st.markdown(
     """
-# 📚 Snap2Study **AI**
+    <style>
+    /* ===== HERO ===== */
 
-### Học thông minh hơn từ chính tài liệu của bạn
+    .snap-hero {
+        position: relative;
+        overflow: hidden;
+        margin: 10px 0 35px 0;
+        padding: 55px 35px 50px 35px;
+        border-radius: 28px;
+        text-align: center;
+        background:
+            radial-gradient(
+                circle at 20% 20%,
+                rgba(255,255,255,0.22),
+                transparent 32%
+            ),
+            radial-gradient(
+                circle at 80% 80%,
+                rgba(167,139,250,0.30),
+                transparent 35%
+            ),
+            linear-gradient(
+                135deg,
+                #5B4BDB 0%,
+                #6D5CE7 45%,
+                #7C5CFC 100%
+            );
+        box-shadow:
+            0 18px 45px rgba(91, 75, 219, 0.22),
+            inset 0 1px 0 rgba(255,255,255,0.25);
+    }
 
-Biến ảnh bài học thành **Tóm tắt + Flashcard + Quiz**
-bằng OCR và Gemini AI.
-"""
+    .snap-hero::before {
+        content: "";
+        position: absolute;
+        width: 260px;
+        height: 260px;
+        border-radius: 50%;
+        background: rgba(255,255,255,0.08);
+        top: -120px;
+        left: -80px;
+    }
+
+    .snap-hero::after {
+        content: "";
+        position: absolute;
+        width: 220px;
+        height: 220px;
+        border-radius: 50%;
+        background: rgba(255,255,255,0.07);
+        bottom: -120px;
+        right: -70px;
+    }
+
+    .snap-hero-content {
+        position: relative;
+        z-index: 2;
+    }
+
+    .snap-logo {
+        font-size: 52px;
+        font-weight: 800;
+        letter-spacing: -1.5px;
+        color: white;
+        margin-bottom: 8px;
+    }
+
+    .snap-logo-ai {
+        opacity: 0.9;
+        font-weight: 500;
+    }
+
+    .snap-tagline {
+        color: rgba(255,255,255,0.96);
+        font-size: 24px;
+        font-weight: 700;
+        margin: 8px 0 15px 0;
+    }
+
+    .snap-description {
+        max-width: 700px;
+        margin: 0 auto;
+        color: rgba(255,255,255,0.84);
+        font-size: 16px;
+        line-height: 1.7;
+    }
+
+    /* ===== FEATURE CARDS ===== */
+
+    .feature-card {
+        height: 100%;
+        padding: 25px 22px;
+        border-radius: 20px;
+        background: white;
+        border: 1px solid #E6E8F0;
+        box-shadow:
+            0 8px 25px rgba(16,24,40,0.06);
+        text-align: center;
+        transition: all 0.2s ease;
+    }
+
+    .feature-icon {
+        width: 52px;
+        height: 52px;
+        margin: 0 auto 14px auto;
+        border-radius: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #F0EDFF;
+        font-size: 26px;
+    }
+
+    .feature-title {
+        color: #101828;
+        font-size: 17px;
+        font-weight: 750;
+        margin-bottom: 7px;
+    }
+
+    .feature-text {
+        color: #667085;
+        font-size: 14px;
+        line-height: 1.55;
+    }
+
+    /* ===== START SECTION ===== */
+
+    .start-title {
+        text-align: center;
+        color: #101828;
+        font-size: 25px;
+        font-weight: 750;
+        margin-top: 42px;
+        margin-bottom: 5px;
+    }
+
+    .start-subtitle {
+        text-align: center;
+        color: #667085;
+        font-size: 14px;
+        margin-bottom: 18px;
+    }
+
+    @media (max-width: 700px) {
+        .snap-hero {
+            padding: 40px 22px;
+            border-radius: 22px;
+        }
+
+        .snap-logo {
+            font-size: 39px;
+        }
+
+        .snap-tagline {
+            font-size: 20px;
+        }
+
+        .snap-description {
+            font-size: 14px;
+        }
+    }
+    </style>
+
+    <div class="snap-hero">
+        <div class="snap-hero-content">
+
+            <div class="snap-logo">
+                📚 Snap2Study
+                <span class="snap-logo-ai">AI</span>
+            </div>
+
+            <div class="snap-tagline">
+                Học thông minh hơn từ chính tài liệu của bạn
+            </div>
+
+            <div class="snap-description">
+                Biến ảnh bài học thành
+                <b>Tóm tắt + Flashcard + Quiz</b>
+                bằng OCR và Gemini AI.
+                <br>
+                Học nhanh hơn. Ôn tập hiệu quả hơn.
+            </div>
+
+        </div>
+    </div>
+    """,
+    unsafe_allow_html=True
+)
+
+
+# =========================
+# FEATURES
+# =========================
+
+st.markdown(
+    """
+    <div style="
+        text-align:center;
+        margin-bottom:20px;
+    ">
+        <div style="
+            font-size:25px;
+            font-weight:750;
+            color:#101828;
+        ">
+            ✨ Một tài liệu — nhiều cách học
+        </div>
+
+        <div style="
+            color:#667085;
+            font-size:14px;
+            margin-top:6px;
+        ">
+            Snap2Study giúp bạn biến tài liệu thành một bộ ôn tập hoàn chỉnh.
+        </div>
+    </div>
+    """,
+    unsafe_allow_html=True
+)
+
+col1, col2, col3 = st.columns(3, gap="medium")
+
+with col1:
+    st.markdown(
+        """
+        <div class="feature-card">
+            <div class="feature-icon">📷</div>
+
+            <div class="feature-title">
+                Nhận diện tài liệu
+            </div>
+
+            <div class="feature-text">
+                OCR chuyển nội dung trong ảnh
+                thành văn bản để AI có thể xử lý.
+            </div>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
+with col2:
+    st.markdown(
+        """
+        <div class="feature-card">
+            <div class="feature-icon">🃏</div>
+
+            <div class="feature-title">
+                Flashcard thông minh
+            </div>
+
+            <div class="feature-text">
+                AI biến kiến thức quan trọng
+                thành câu hỏi và đáp án dễ ôn tập.
+            </div>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
+with col3:
+    st.markdown(
+        """
+        <div class="feature-card">
+            <div class="feature-icon">❓</div>
+
+            <div class="feature-title">
+                Quiz kiểm tra
+            </div>
+
+            <div class="feature-text">
+                Kiểm tra mức độ hiểu bài
+                và tìm ra những phần cần ôn lại.
+            </div>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
+
+# =========================
+# START STUDY
+# =========================
+
+st.markdown(
+    """
+    <div class="start-title">
+        🚀 Bắt đầu học
+    </div>
+
+    <div class="start-subtitle">
+        Tải lên ảnh tài liệu của bạn để Snap2Study bắt đầu xử lý.
+    </div>
+    """,
+    unsafe_allow_html=True
 )
 
 
