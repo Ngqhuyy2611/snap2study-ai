@@ -3,7 +3,8 @@ import streamlit as st
 
 def display_flashcards(
     flashcards,
-    title="🃏 Flashcard"
+    title="🃏 Flashcard",
+    state_prefix="main"
 ):
 
     if not flashcards:
@@ -11,24 +12,29 @@ def display_flashcards(
         return
 
     # =====================================================
-    # SESSION STATE
+    # UNIQUE SESSION STATE
     # =====================================================
 
-    if "flashcard_index" not in st.session_state:
-        st.session_state.flashcard_index = 0
+    index_key = f"{state_prefix}_flashcard_index"
+    flipped_key = f"{state_prefix}_flashcard_flipped"
 
-    if "flashcard_flipped" not in st.session_state:
-        st.session_state.flashcard_flipped = False
+    if index_key not in st.session_state:
+        st.session_state[index_key] = 0
 
-    # Kiểm tra index
-    if st.session_state.flashcard_index >= len(flashcards):
+    if flipped_key not in st.session_state:
+        st.session_state[flipped_key] = False
 
-        st.session_state.flashcard_index = 0
-        st.session_state.flashcard_flipped = False
+    # =====================================================
+    # CHECK INDEX
+    # =====================================================
 
-    index = st.session_state.flashcard_index
+    if st.session_state[index_key] >= len(flashcards):
 
-    flipped = st.session_state.flashcard_flipped
+        st.session_state[index_key] = 0
+        st.session_state[flipped_key] = False
+
+    index = st.session_state[index_key]
+    flipped = st.session_state[flipped_key]
 
     card = flashcards[index]
 
@@ -61,201 +67,168 @@ def display_flashcards(
 
     st.markdown(
         """
-        <style>
+<style>
 
-        /* ==============================
-           FLASHCARD
-        ============================== */
+.flashcard-wrapper {
+    margin-top: 20px;
+    margin-bottom: 25px;
+}
 
-        .flashcard-box {
-            border-radius: 24px;
-            padding: 35px 30px;
-            margin: 20px 0;
+.flashcard-card {
+    border-radius: 24px;
+    padding: 42px 35px;
+    min-height: 300px;
 
-            min-height: 280px;
+    text-align: center;
 
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
+    box-shadow:
+        0 12px 35px rgba(16, 24, 40, 0.10);
+}
 
-            text-align: center;
+.flashcard-question {
+    background:
+        linear-gradient(
+            135deg,
+            #F5F3FF 0%,
+            #EEF4FF 100%
+        );
 
-            box-shadow:
-                0 10px 30px rgba(0, 0, 0, 0.08);
-        }
+    border: 2px solid #DDD9FF;
+}
 
+.flashcard-answer {
+    background:
+        linear-gradient(
+            135deg,
+            #ECFDF3 0%,
+            #EFF8FF 100%
+        );
 
-        .flashcard-question-box {
+    border: 2px solid #C8EFD9;
+}
 
-            background:
-                linear-gradient(
-                    135deg,
-                    #f5f3ff,
-                    #eef4ff
-                );
+.flashcard-number {
+    color: #667085;
+    font-size: 13px;
+    font-weight: 800;
 
-            border: 2px solid #ddd9ff;
-        }
+    letter-spacing: 0.7px;
 
+    margin-bottom: 15px;
+}
 
-        .flashcard-answer-box {
+.flashcard-label {
+    display: inline-block;
 
-            background:
-                linear-gradient(
-                    135deg,
-                    #ecfdf3,
-                    #eff8ff
-                );
+    padding: 7px 15px;
 
-            border: 2px solid #c9f0dc;
-        }
+    border-radius: 999px;
 
+    font-size: 12px;
+    font-weight: 800;
 
-        .flashcard-label {
+    letter-spacing: 0.5px;
 
-            font-size: 13px;
+    margin-bottom: 25px;
+}
 
-            font-weight: 800;
+.flashcard-question-label {
+    color: #5146D8;
+    background: #E9E7FF;
+}
 
-            letter-spacing: 1px;
+.flashcard-answer-label {
+    color: #087443;
+    background: #DDF8EA;
+}
 
-            margin-bottom: 20px;
+.flashcard-question-text {
+    color: #101828;
 
-            padding: 7px 15px;
+    font-size: 25px;
+    font-weight: 750;
 
-            border-radius: 999px;
+    line-height: 1.55;
 
-            display: inline-block;
-        }
+    margin: 10px auto;
 
+    max-width: 800px;
+}
 
-        .question-label {
+.flashcard-answer-text {
+    color: #101828;
 
-            color: #5146d8;
+    font-size: 21px;
+    font-weight: 600;
 
-            background: #e9e7ff;
-        }
+    line-height: 1.65;
 
+    margin: 10px auto;
 
-        .answer-label {
+    max-width: 800px;
+}
 
-            color: #087443;
+.flashcard-hint {
+    color: #667085;
 
-            background: #dff7e9;
-        }
+    font-size: 14px;
 
+    margin-top: 28px;
+}
 
-        .flashcard-number {
+.flashcard-difficulty {
+    display: inline-block;
 
-            color: #667085;
+    margin-top: 25px;
 
-            font-size: 13px;
+    padding: 8px 16px;
 
-            font-weight: 700;
+    border-radius: 999px;
 
-            margin-bottom: 12px;
-        }
+    background: rgba(255,255,255,0.8);
 
+    border: 1px solid #D0D5DD;
 
-        .flashcard-question-text {
+    color: #475467;
 
-            color: #101828;
+    font-size: 13px;
+    font-weight: 700;
+}
 
-            font-size: 25px;
+.flashcard-title {
+    text-align: center;
 
-            font-weight: 750;
+    color: #101828;
 
-            line-height: 1.5;
+    font-size: 28px;
+    font-weight: 800;
 
-            margin: 10px 0;
-        }
+    margin-top: 20px;
+    margin-bottom: 5px;
+}
 
+.flashcard-subtitle {
+    text-align: center;
 
-        .flashcard-answer-text {
+    color: #667085;
 
-            color: #101828;
+    font-size: 14px;
 
-            font-size: 21px;
+    margin-bottom: 20px;
+}
 
-            font-weight: 600;
+.flashcard-memory-title {
+    text-align: center;
 
-            line-height: 1.6;
+    color: #344054;
 
-            margin: 10px 0;
-        }
+    font-size: 15px;
+    font-weight: 700;
 
+    margin: 18px 0 12px 0;
+}
 
-        .flashcard-hint {
-
-            color: #667085;
-
-            font-size: 14px;
-
-            margin-top: 25px;
-        }
-
-
-        .difficulty {
-
-            margin-top: 20px;
-
-            padding: 7px 15px;
-
-            border-radius: 999px;
-
-            background: rgba(255,255,255,0.8);
-
-            border: 1px solid #d0d5dd;
-
-            color: #475467;
-
-            font-size: 13px;
-
-            font-weight: 700;
-        }
-
-
-        .flashcard-title {
-
-            text-align: center;
-
-            font-size: 28px;
-
-            font-weight: 800;
-
-            color: #101828;
-
-            margin-top: 20px;
-
-            margin-bottom: 5px;
-        }
-
-
-        .flashcard-subtitle {
-
-            text-align: center;
-
-            color: #667085;
-
-            font-size: 14px;
-
-            margin-bottom: 20px;
-        }
-
-
-        .memory-question {
-
-            text-align: center;
-
-            color: #344054;
-
-            font-weight: 700;
-
-            margin: 15px 0;
-        }
-
-        </style>
+</style>
         """,
         unsafe_allow_html=True
     )
@@ -266,13 +239,13 @@ def display_flashcards(
 
     st.markdown(
         f"""
-        <div class="flashcard-title">
-            {title}
-        </div>
+<div class="flashcard-title">
+    {title}
+</div>
 
-        <div class="flashcard-subtitle">
-            Lật thẻ để kiểm tra khả năng ghi nhớ
-        </div>
+<div class="flashcard-subtitle">
+    Lật thẻ để kiểm tra khả năng ghi nhớ
+</div>
         """,
         unsafe_allow_html=True
     )
@@ -294,40 +267,62 @@ def display_flashcards(
 
     if not flipped:
 
+        # CSS chỉ tạo nền/khung.
+        # Nội dung được render bằng Streamlit
+        # để tránh lỗi HTML hiển thị thành text.
+
+        st.markdown(
+            '<div class="flashcard-wrapper">'
+            '<div class="flashcard-card flashcard-question">',
+            unsafe_allow_html=True
+        )
+
         st.markdown(
             f"""
-            <div class="flashcard-box flashcard-question-box">
+**FLASHCARD {index + 1:02d}**
+            """
+        )
 
-                <div class="flashcard-number">
-                    FLASHCARD {index + 1:02d}
-                </div>
+        st.markdown(
+            '<span class="flashcard-label '
+            'flashcard-question-label">'
+            '❓ CÂU HỎI'
+            '</span>',
+            unsafe_allow_html=True
+        )
 
-                <div class="flashcard-label question-label">
-                    ❓ CÂU HỎI
-                </div>
-
-                <div class="flashcard-question-text">
-                    {question}
-                </div>
-
-                <div class="flashcard-hint">
-                    💡 Hãy thử trả lời trước khi lật thẻ
-                </div>
-
-            </div>
+        st.markdown(
+            f"""
+<div class="flashcard-question-text">
+{question}
+</div>
             """,
+            unsafe_allow_html=True
+        )
+
+        st.markdown(
+            """
+<div class="flashcard-hint">
+💡 Hãy thử tự trả lời trước khi lật thẻ
+</div>
+            """,
+            unsafe_allow_html=True
+        )
+
+        st.markdown(
+            "</div></div>",
             unsafe_allow_html=True
         )
 
         st.write("")
 
         if st.button(
-            "🔄 Lật thẻ",
+            "🔄  Lật thẻ",
             use_container_width=True,
             type="primary"
         ):
 
-            st.session_state.flashcard_flipped = True
+            st.session_state[flipped_key] = True
 
             st.rerun()
 
@@ -338,27 +333,47 @@ def display_flashcards(
     else:
 
         st.markdown(
+            '<div class="flashcard-wrapper">'
+            '<div class="flashcard-card flashcard-answer">',
+            unsafe_allow_html=True
+        )
+
+        st.markdown(
             f"""
-            <div class="flashcard-box flashcard-answer-box">
+**FLASHCARD {index + 1:02d}**
+            """
+        )
 
-                <div class="flashcard-number">
-                    FLASHCARD {index + 1:02d}
-                </div>
+        st.markdown(
+            '<span class="flashcard-label '
+            'flashcard-answer-label">'
+            '✅ ĐÁP ÁN'
+            '</span>',
+            unsafe_allow_html=True
+        )
 
-                <div class="flashcard-label answer-label">
-                    ✅ ĐÁP ÁN
-                </div>
-
-                <div class="flashcard-answer-text">
-                    {answer}
-                </div>
-
-                <div class="difficulty">
-                    📊 Độ khó: {difficulty}
-                </div>
-
-            </div>
+        st.markdown(
+            f"""
+<div class="flashcard-answer-text">
+{answer}
+</div>
             """,
+            unsafe_allow_html=True
+        )
+
+        if difficulty:
+
+            st.markdown(
+                f"""
+<div class="flashcard-difficulty">
+📊 Độ khó: {difficulty}
+</div>
+                """,
+                unsafe_allow_html=True
+            )
+
+        st.markdown(
+            "</div></div>",
             unsafe_allow_html=True
         )
 
@@ -368,9 +383,9 @@ def display_flashcards(
 
         st.markdown(
             """
-            <div class="memory-question">
-                🧠 Bạn nhớ thẻ này đến mức nào?
-            </div>
+<div class="flashcard-memory-title">
+🧠 Bạn nhớ thẻ này đến mức nào?
+</div>
             """,
             unsafe_allow_html=True
         )
@@ -381,10 +396,11 @@ def display_flashcards(
 
             if st.button(
                 "😕 Chưa nhớ",
-                use_container_width=True
+                use_container_width=True,
+                key=f"{state_prefix}_not_remembered_{index}"
             ):
 
-                st.session_state.flashcard_flipped = False
+                st.session_state[flipped_key] = False
 
                 st.toast(
                     "💡 Hãy ôn lại thẻ này!"
@@ -396,10 +412,11 @@ def display_flashcards(
 
             if st.button(
                 "🤔 Hơi nhớ",
-                use_container_width=True
+                use_container_width=True,
+                key=f"{state_prefix}_half_remembered_{index}"
             ):
 
-                st.session_state.flashcard_flipped = False
+                st.session_state[flipped_key] = False
 
                 st.toast(
                     "📖 Có thể ôn lại lần nữa!"
@@ -411,10 +428,11 @@ def display_flashcards(
 
             if st.button(
                 "😊 Đã nhớ",
-                use_container_width=True
+                use_container_width=True,
+                key=f"{state_prefix}_remembered_{index}"
             ):
 
-                st.session_state.flashcard_flipped = False
+                st.session_state[flipped_key] = False
 
                 st.toast(
                     "🎉 Tuyệt vời!"
@@ -433,27 +451,29 @@ def display_flashcards(
         with col1:
 
             if st.button(
-                "← Thẻ trước",
+                "←  Thẻ trước",
                 use_container_width=True,
-                disabled=(index == 0)
+                disabled=(index == 0),
+                key=f"{state_prefix}_previous"
             ):
 
-                st.session_state.flashcard_index -= 1
+                st.session_state[index_key] -= 1
 
-                st.session_state.flashcard_flipped = False
+                st.session_state[flipped_key] = False
 
                 st.rerun()
 
         with col2:
 
             if st.button(
-                "Thẻ tiếp →",
+                "Thẻ tiếp  →",
                 use_container_width=True,
-                disabled=(index == total - 1)
+                disabled=(index == total - 1),
+                key=f"{state_prefix}_next"
             ):
 
-                st.session_state.flashcard_index += 1
+                st.session_state[index_key] += 1
 
-                st.session_state.flashcard_flipped = False
+                st.session_state[flipped_key] = False
 
                 st.rerun()
