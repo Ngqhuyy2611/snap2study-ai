@@ -3,11 +3,18 @@ import streamlit as st
 
 def display_flashcards(
     flashcards,
-    title="🃏 Flashcard"
+    title="🃏 Flashcard",
+    state_prefix=None
 ):
     """
     Hiển thị Flashcard dạng card nổi.
-    Tự động tách state giữa Flashcard chính và Flashcard ôn lại.
+
+    state_prefix:
+    - "main"   -> Flashcard chính
+    - "review" -> Flashcard ôn lại
+
+    Nếu không truyền state_prefix, tự động xác định
+    dựa trên title.
     """
 
     if not flashcards:
@@ -18,11 +25,15 @@ def display_flashcards(
     # STATE PREFIX
     # =========================================================
 
-    # Nếu là phần "Ôn lại", dùng state riêng
-    if "ôn lại" in title.lower() or "review" in title.lower():
-        state_prefix = "review"
-    else:
-        state_prefix = "main"
+    if state_prefix is None:
+
+        if (
+            "ôn lại" in title.lower()
+            or "review" in title.lower()
+        ):
+            state_prefix = "review"
+        else:
+            state_prefix = "main"
 
     index_key = f"{state_prefix}_flashcard_index"
     flipped_key = f"{state_prefix}_flashcard_flipped"
@@ -35,8 +46,15 @@ def display_flashcards(
 
     total = len(flashcards)
 
-    # Bảo vệ index
+    # =========================================================
+    # PROTECT INDEX
+    # =========================================================
+
     if st.session_state[index_key] >= total:
+        st.session_state[index_key] = 0
+        st.session_state[flipped_key] = False
+
+    if st.session_state[index_key] < 0:
         st.session_state[index_key] = 0
         st.session_state[flipped_key] = False
 
@@ -151,11 +169,11 @@ def display_flashcards(
             #F8F7FF 100%
         ) !important;
 
-    border: 2px solid #BDB7FF !important;
+    border: 2px solid #A9A2FF !important;
 
     box-shadow:
-        0 14px 34px rgba(99, 91, 255, 0.12),
-        0 3px 8px rgba(16, 24, 40, 0.06) !important;
+        0 14px 34px rgba(99, 91, 255, 0.14),
+        0 3px 8px rgba(16, 24, 40, 0.07) !important;
 }
 
 
@@ -171,12 +189,30 @@ def display_flashcards(
             #F4FBF9 100%
         ) !important;
 
-    border: 2px solid #9DDDD0 !important;
+    border: 2px solid #8CCFC0 !important;
 
     box-shadow:
-        0 14px 34px rgba(52, 168, 148, 0.12),
-        0 3px 8px rgba(16, 24, 40, 0.06) !important;
+        0 14px 34px rgba(52, 168, 148, 0.14),
+        0 3px 8px rgba(16, 24, 40, 0.07) !important;
 }
+
+
+/* =========================================================
+   CARD NUMBER
+   ========================================================= */
+
+.snap-card-number {
+    color: #98A2B3;
+
+    font-size: 11px;
+
+    font-weight: 800;
+
+    letter-spacing: 1.2px;
+
+    margin-bottom: 13px;
+}
+
 
 /* =========================================================
    BADGES
@@ -198,8 +234,8 @@ def display_flashcards(
 }
 
 .snap-question-badge {
-    color: #5146d8;
-    background: #e9e7ff;
+    color: #5146D8;
+    background: #E9E7FF;
 
     box-shadow:
         0 4px 12px rgba(99, 91, 255, 0.10);
@@ -207,7 +243,7 @@ def display_flashcards(
 
 .snap-answer-badge {
     color: #087443;
-    background: #dff8e9;
+    background: #DFF8E9;
 
     box-shadow:
         0 4px 12px rgba(16, 185, 129, 0.10);
@@ -276,9 +312,9 @@ def display_flashcards(
 
     border-radius: 999px;
 
-    background: rgba(255,255,255,0.72);
+    background: rgba(255, 255, 255, 0.78);
 
-    border: 1px solid #d0d5dd;
+    border: 1px solid #D0D5DD;
 
     color: #475467;
 
@@ -302,17 +338,6 @@ def display_flashcards(
     font-weight: 750;
 
     margin: 20px 0 12px 0;
-}
-
-
-/* =========================================================
-   BUTTONS
-   ========================================================= */
-
-.snap-flashcard-wrap .stButton > button {
-    border-radius: 13px;
-    min-height: 46px;
-    font-weight: 750;
 }
 
 
@@ -379,18 +404,23 @@ def display_flashcards(
 
         card_html = (
             '<div class="snap-card snap-card-question">'
+
             f'<div class="snap-card-number">'
             f'FLASHCARD {index + 1:02d}'
             '</div>'
+
             '<div class="snap-card-badge snap-question-badge">'
             '❓ CÂU HỎI'
             '</div>'
+
             f'<div class="snap-question-text">'
             f'{question}'
             '</div>'
+
             '<div class="snap-card-hint">'
             '💡 Hãy thử tự trả lời trước khi lật thẻ'
             '</div>'
+
             '</div>'
         )
 
@@ -405,7 +435,9 @@ def display_flashcards(
             type="primary",
             key=f"{state_prefix}_flip_{index}"
         ):
+
             st.session_state[flipped_key] = True
+
             st.rerun()
 
     # =========================================================
@@ -416,18 +448,22 @@ def display_flashcards(
 
         card_html = (
             '<div class="snap-card snap-card-answer">'
+
             f'<div class="snap-card-number">'
             f'FLASHCARD {index + 1:02d}'
             '</div>'
+
             '<div class="snap-card-badge snap-answer-badge">'
             '✅ ĐÁP ÁN'
             '</div>'
+
             f'<div class="snap-answer-text">'
             f'{answer}'
             '</div>'
         )
 
         if difficulty:
+
             card_html += (
                 f'<div class="snap-difficulty">'
                 f'📊 Độ khó: {difficulty}'
@@ -455,33 +491,51 @@ def display_flashcards(
         col1, col2, col3 = st.columns(3)
 
         with col1:
+
             if st.button(
                 "😕 Chưa nhớ",
                 use_container_width=True,
                 key=f"{state_prefix}_not_{index}"
             ):
+
                 st.session_state[flipped_key] = False
-                st.toast("💡 Hãy ôn lại thẻ này!")
+
+                st.toast(
+                    "💡 Hãy ôn lại thẻ này!"
+                )
+
                 st.rerun()
 
         with col2:
+
             if st.button(
                 "🤔 Hơi nhớ",
                 use_container_width=True,
                 key=f"{state_prefix}_half_{index}"
             ):
+
                 st.session_state[flipped_key] = False
-                st.toast("📖 Ôn thêm một lần nữa nhé!")
+
+                st.toast(
+                    "📖 Ôn thêm một lần nữa nhé!"
+                )
+
                 st.rerun()
 
         with col3:
+
             if st.button(
                 "😊 Đã nhớ",
                 use_container_width=True,
                 key=f"{state_prefix}_remembered_{index}"
             ):
+
                 st.session_state[flipped_key] = False
-                st.toast("🎉 Tuyệt vời!")
+
+                st.toast(
+                    "🎉 Tuyệt vời!"
+                )
+
                 st.rerun()
 
     # =========================================================
@@ -500,8 +554,10 @@ def display_flashcards(
             disabled=(index == 0),
             key=f"{state_prefix}_previous_{index}"
         ):
+
             st.session_state[index_key] -= 1
             st.session_state[flipped_key] = False
+
             st.rerun()
 
     with col2:
@@ -512,6 +568,8 @@ def display_flashcards(
             disabled=(index == total - 1),
             key=f"{state_prefix}_next_{index}"
         ):
+
             st.session_state[index_key] += 1
             st.session_state[flipped_key] = False
+
             st.rerun()
