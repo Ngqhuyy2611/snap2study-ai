@@ -47,31 +47,20 @@ def display_quiz(quiz):
    ========================================================= */
 
 .snap-quiz-card {
-    background:
-        radial-gradient(
-            circle at top right,
-            rgba(129, 140, 248, 0.14),
-            transparent 32%
-        ),
-        linear-gradient(
-            135deg,
-            #ffffff 0%,
-            #f8f7ff 100%
-        );
+    background: #FFFFFF !important;
 
-    border: 1px solid #dfdcff;
+    border: 2px solid #D9D6FF !important;
 
-    border-radius: 22px;
+    border-radius: 24px !important;
 
-    padding: 27px 30px;
+    padding: 26px !important;
 
-    margin: 18px 0 10px 0;
+    margin: 14px 0 !important;
 
     box-shadow:
-        0 12px 30px rgba(67, 56, 202, 0.09),
-        0 4px 12px rgba(16, 24, 40, 0.05);
+        0 10px 28px rgba(16, 24, 40, 0.08),
+        0 3px 8px rgba(99, 91, 255, 0.06) !important;
 }
-
 
 /* =========================================================
    QUESTION NUMBER
