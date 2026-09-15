@@ -4,26 +4,233 @@ import streamlit as st
 def display_quiz(quiz):
 
     if not quiz:
-
-        st.warning(
-            "Chưa có câu hỏi Quiz."
-        )
-
+        st.warning("Chưa có câu hỏi Quiz.")
         return
 
-    # =====================================================
-    # HEADER
-    # =====================================================
+    # =========================================================
+    # CSS
+    # =========================================================
 
-    st.markdown("## ❓ Quiz")
+    st.markdown(
+        """
+<style>
 
-    st.caption(
-        "Kiểm tra mức độ hiểu bài của bạn."
+/* =========================================================
+   QUIZ
+   ========================================================= */
+
+.snap-quiz-title {
+    text-align: center;
+
+    color: #101828;
+
+    font-size: 29px;
+    font-weight: 800;
+
+    margin-top: 30px;
+    margin-bottom: 5px;
+}
+
+.snap-quiz-subtitle {
+    text-align: center;
+
+    color: #667085;
+
+    font-size: 14px;
+
+    margin-bottom: 24px;
+}
+
+
+/* =========================================================
+   QUESTION CARD
+   ========================================================= */
+
+.snap-quiz-card {
+    background:
+        radial-gradient(
+            circle at top right,
+            rgba(129, 140, 248, 0.14),
+            transparent 32%
+        ),
+        linear-gradient(
+            135deg,
+            #ffffff 0%,
+            #f8f7ff 100%
+        );
+
+    border: 1px solid #dfdcff;
+
+    border-radius: 22px;
+
+    padding: 27px 30px;
+
+    margin: 18px 0 10px 0;
+
+    box-shadow:
+        0 12px 30px rgba(67, 56, 202, 0.09),
+        0 4px 12px rgba(16, 24, 40, 0.05);
+}
+
+
+/* =========================================================
+   QUESTION NUMBER
+   ========================================================= */
+
+.snap-quiz-number {
+    display: inline-block;
+
+    padding: 6px 12px;
+
+    border-radius: 999px;
+
+    background: #eeecff;
+
+    color: #5146d8;
+
+    font-size: 12px;
+
+    font-weight: 800;
+
+    letter-spacing: 0.6px;
+
+    margin-bottom: 13px;
+}
+
+
+/* =========================================================
+   QUESTION TEXT
+   ========================================================= */
+
+.snap-quiz-question {
+    color: #101828;
+
+    font-size: 17px;
+
+    line-height: 1.6;
+
+    font-weight: 700;
+}
+
+
+/* =========================================================
+   RESULT CARD
+   ========================================================= */
+
+.snap-result-card {
+    background:
+        linear-gradient(
+            135deg,
+            #f8f7ff 0%,
+            #eef4ff 100%
+        );
+
+    border: 1px solid #d8d4ff;
+
+    border-radius: 25px;
+
+    padding: 30px;
+
+    margin: 25px 0;
+
+    text-align: center;
+
+    box-shadow:
+        0 16px 38px rgba(67, 56, 202, 0.11);
+}
+
+
+/* =========================================================
+   SCORE
+   ========================================================= */
+
+.snap-score {
+    color: #5146d8;
+
+    font-size: 46px;
+
+    font-weight: 850;
+
+    line-height: 1;
+
+    margin: 12px 0;
+}
+
+
+/* =========================================================
+   SCORE LABEL
+   ========================================================= */
+
+.snap-score-label {
+    color: #667085;
+
+    font-size: 14px;
+
+    font-weight: 600;
+}
+
+
+/* =========================================================
+   DETAIL
+   ========================================================= */
+
+.snap-quiz-detail {
+    border-radius: 17px;
+
+    padding: 18px 20px;
+
+    margin: 12px 0;
+
+    font-size: 14px;
+
+    line-height: 1.55;
+}
+
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+@media (max-width: 768px) {
+
+    .snap-quiz-card {
+        padding: 22px 18px;
+        border-radius: 18px;
+    }
+
+    .snap-quiz-question {
+        font-size: 16px;
+    }
+
+    .snap-score {
+        font-size: 40px;
+    }
+}
+
+</style>
+        """,
+        unsafe_allow_html=True
     )
 
-    # =====================================================
-    # QUIZ STATE
-    # =====================================================
+    # =========================================================
+    # TITLE
+    # =========================================================
+
+    st.markdown(
+        '<div class="snap-quiz-title">❓ Quiz</div>',
+        unsafe_allow_html=True
+    )
+
+    st.markdown(
+        '<div class="snap-quiz-subtitle">'
+        'Kiểm tra mức độ hiểu bài của bạn'
+        '</div>',
+        unsafe_allow_html=True
+    )
+
+    # =========================================================
+    # SESSION STATE
+    # =========================================================
 
     if "quiz_submitted" not in st.session_state:
         st.session_state.quiz_submitted = False
@@ -37,9 +244,12 @@ def display_quiz(quiz):
     if "quiz_percentage" not in st.session_state:
         st.session_state.quiz_percentage = 0
 
-    # =====================================================
-    # FORM
-    # =====================================================
+    if "quiz_answers" not in st.session_state:
+        st.session_state.quiz_answers = []
+
+    # =========================================================
+    # QUIZ FORM
+    # =========================================================
 
     with st.form("snap2study_quiz_form"):
 
@@ -59,50 +269,59 @@ def display_quiz(quiz):
                 []
             )
 
-            # Khung câu hỏi
-            with st.container(border=True):
+            # -------------------------------------------------
+            # FLOATING QUESTION CARD
+            # -------------------------------------------------
 
-                st.markdown(
-                    f"### 🟣 Câu {i + 1}"
-                )
+            question_html = (
+                '<div class="snap-quiz-card">'
+                f'<div class="snap-quiz-number">'
+                f'CÂU {i + 1}'
+                '</div>'
+                f'<div class="snap-quiz-question">'
+                f'{question_text}'
+                '</div>'
+                '</div>'
+            )
 
-                st.markdown(
-                    f"**{question_text}**"
-                )
+            st.markdown(
+                question_html,
+                unsafe_allow_html=True
+            )
 
-                st.write("")
+            selected = st.radio(
+                "Chọn đáp án:",
+                options,
+                index=None,
+                key=f"snap_quiz_answer_{i}",
+                label_visibility="visible"
+            )
 
-                selected = st.radio(
-                    "Chọn đáp án:",
-                    options,
-                    key=f"snap_quiz_{i}",
-                    index=None
-                )
+            answers.append(selected)
 
-                answers.append(selected)
-
-            st.write("")
+        st.write("")
 
         submitted = st.form_submit_button(
-            "📝 Nộp bài",
+            "📝  Nộp bài",
             use_container_width=True,
             type="primary"
         )
 
-    # =====================================================
+    # =========================================================
     # CALCULATE RESULT
-    # =====================================================
+    # =========================================================
 
     if submitted:
 
         score = 0
+
         wrong_questions = []
 
         for i, question in enumerate(quiz):
 
             selected = answers[i]
 
-            correct = str(
+            correct_letter = str(
                 question.get(
                     "answer",
                     ""
@@ -112,17 +331,24 @@ def display_quiz(quiz):
             correct_text = str(
                 question.get(
                     "correct_answer",
-                    correct
+                    correct_letter
                 )
             )
 
             if selected:
 
+                selected_text = str(
+                    selected
+                ).strip()
+
+                # Lấy chữ A/B/C/D ở đầu option
                 selected_letter = (
-                    str(selected).strip()[0].upper()
+                    selected_text[0].upper()
+                    if selected_text
+                    else ""
                 )
 
-                if selected_letter == correct:
+                if selected_letter == correct_letter:
 
                     score += 1
 
@@ -150,22 +376,27 @@ def display_quiz(quiz):
 
         total = len(quiz)
 
-        percentage = int(
-            score / total * 100
-        ) if total else 0
+        percentage = (
+            int(score / total * 100)
+            if total
+            else 0
+        )
 
-        # Lưu kết quả
+        # Save
         st.session_state.quiz_submitted = True
         st.session_state.quiz_score = score
         st.session_state.quiz_total = total
         st.session_state.quiz_percentage = percentage
-        st.session_state.review_cards = wrong_questions
-
         st.session_state.quiz_answers = answers
 
-    # =====================================================
-    # SHOW RESULT
-    # =====================================================
+        # Review cards
+        st.session_state.review_cards = (
+            wrong_questions
+        )
+
+    # =========================================================
+    # RESULT
+    # =========================================================
 
     if st.session_state.quiz_submitted:
 
@@ -173,27 +404,37 @@ def display_quiz(quiz):
         total = st.session_state.quiz_total
         percentage = st.session_state.quiz_percentage
 
-        st.write("")
+        # -----------------------------------------------------
+        # SCORE CARD
+        # -----------------------------------------------------
 
-        # Điểm
-        with st.container(border=True):
+        result_html = (
+            '<div class="snap-result-card">'
+            '<div class="snap-score-label">'
+            '🎯 KẾT QUẢ CỦA BẠN'
+            '</div>'
+            f'<div class="snap-score">'
+            f'{score} / {total}'
+            '</div>'
+            f'<div class="snap-score-label">'
+            f'Độ chính xác: {percentage}%'
+            '</div>'
+            '</div>'
+        )
 
-            st.markdown(
-                "### 🎯 Kết quả của bạn"
-            )
+        st.markdown(
+            result_html,
+            unsafe_allow_html=True
+        )
 
-            st.markdown(
-                f"# {score} / {total}"
-            )
+        st.progress(
+            percentage / 100,
+            text=f"📊 {percentage}% chính xác"
+        )
 
-            st.progress(
-                percentage / 100,
-                text=f"📊 Độ chính xác: {percentage}%"
-            )
-
-        # =================================================
-        # MESSAGE
-        # =================================================
+        # -----------------------------------------------------
+        # FEEDBACK
+        # -----------------------------------------------------
 
         if percentage >= 80:
 
@@ -213,9 +454,9 @@ def display_quiz(quiz):
                 "📖 Đừng lo! Hãy xem lại bài và thử lại nhé."
             )
 
-        # =================================================
-        # REVIEW
-        # =================================================
+        # -----------------------------------------------------
+        # REVIEW SUGGESTION
+        # -----------------------------------------------------
 
         wrong_questions = (
             st.session_state.review_cards
@@ -223,12 +464,10 @@ def display_quiz(quiz):
 
         if wrong_questions:
 
-            st.write("")
-
             with st.container(border=True):
 
                 st.markdown(
-                    "### 🔁 Gợi ý ôn lại"
+                    "### 🔁 Ôn lại phần chưa chắc"
                 )
 
                 st.write(
@@ -236,31 +475,27 @@ def display_quiz(quiz):
                     f"câu cần ôn lại**."
                 )
 
-                st.info(
-                    "🃏 Những câu chưa đúng sẽ được "
-                    "chuyển thành Flashcard ở phần "
-                    "**Ôn lại phần chưa chắc**."
+                st.caption(
+                    "Các câu này sẽ được chuyển thành "
+                    "Flashcard ở phần bên dưới."
                 )
 
         else:
 
             st.success(
-                "🏆 Tuyệt vời! Bạn không có câu sai."
+                "🏆 Tuyệt vời! Bạn đã trả lời đúng tất cả."
             )
 
-        # =================================================
-        # DETAILED RESULT
-        # =================================================
-
-        st.write("")
+        # -----------------------------------------------------
+        # DETAIL
+        # -----------------------------------------------------
 
         st.markdown(
             "### 📋 Kết quả chi tiết"
         )
 
-        saved_answers = st.session_state.get(
-            "quiz_answers",
-            []
+        saved_answers = (
+            st.session_state.quiz_answers
         )
 
         for i, question in enumerate(quiz):
@@ -271,7 +506,7 @@ def display_quiz(quiz):
                 else None
             )
 
-            correct = str(
+            correct_letter = str(
                 question.get(
                     "answer",
                     ""
@@ -281,32 +516,38 @@ def display_quiz(quiz):
             correct_text = str(
                 question.get(
                     "correct_answer",
-                    correct
+                    correct_letter
                 )
             )
 
             if selected:
 
+                selected_text = str(
+                    selected
+                ).strip()
+
                 selected_letter = (
-                    str(selected).strip()[0].upper()
+                    selected_text[0].upper()
+                    if selected_text
+                    else ""
                 )
 
-                if selected_letter == correct:
+                if selected_letter == correct_letter:
 
                     st.success(
-                        f"**Câu {i + 1}:** ✅ Chính xác"
+                        f"**Câu {i + 1}**  ·  ✅ Chính xác"
                     )
 
                 else:
 
                     st.error(
-                        f"**Câu {i + 1}:** ❌ Sai\n\n"
+                        f"**Câu {i + 1}**  ·  ❌ Chưa đúng  \n"
                         f"Đáp án đúng: **{correct_text}**"
                     )
 
             else:
 
                 st.warning(
-                    f"**Câu {i + 1}:** ⚪ Chưa trả lời\n\n"
+                    f"**Câu {i + 1}**  ·  ⚪ Chưa trả lời  \n"
                     f"Đáp án đúng: **{correct_text}**"
                 )
