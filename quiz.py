@@ -1,236 +1,144 @@
 import streamlit as st
-import html
 
 
 def display_quiz(quiz):
 
     if not quiz:
-
-        st.warning(
-            "Chưa có câu hỏi Quiz."
-        )
-
+        st.warning("Chưa có câu hỏi Quiz.")
         return
 
     # =====================================================
-    # CUSTOM STYLE
+    # CSS
     # =====================================================
 
     st.markdown(
         """
-        <style>
+<style>
 
-        /* =====================================
-           QUIZ HEADER
-        ====================================== */
+.quiz-title {
+    text-align: center;
 
-        .quiz-title {
-            text-align: center;
+    color: #101828;
 
-            font-size: 28px;
-            font-weight: 800;
+    font-size: 28px;
+    font-weight: 800;
 
-            color: #101828;
+    margin-top: 25px;
+    margin-bottom: 5px;
+}
 
-            margin-top: 25px;
-            margin-bottom: 5px;
-        }
+.quiz-subtitle {
+    text-align: center;
 
-        .quiz-subtitle {
-            text-align: center;
+    color: #667085;
 
-            color: #667085;
+    font-size: 14px;
 
-            font-size: 14px;
+    margin-bottom: 25px;
+}
 
-            margin-bottom: 25px;
-        }
+.quiz-question-card {
+    background:
+        linear-gradient(
+            135deg,
+            #F8F7FF 0%,
+            #F2F6FF 100%
+        );
 
-        /* =====================================
-           QUESTION CARD
-        ====================================== */
+    border: 1px solid #DDD9FF;
 
-        .quiz-card {
-            background:
-                linear-gradient(
-                    135deg,
-                    #F8F7FF 0%,
-                    #F2F6FF 100%
-                );
+    border-radius: 20px;
 
-            border: 1px solid rgba(99, 91, 255, 0.15);
+    padding: 22px 24px;
 
-            border-radius: 20px;
+    margin: 18px 0 10px 0;
 
-            padding: 24px 25px;
+    box-shadow:
+        0 8px 25px rgba(16, 24, 40, 0.07);
+}
 
-            margin-top: 18px;
-            margin-bottom: 12px;
+.quiz-number {
+    display: inline-block;
 
-            box-shadow:
-                0 8px 25px rgba(31, 41, 55, 0.07);
-        }
+    padding: 6px 13px;
 
-        .quiz-number {
-            display: inline-block;
+    border-radius: 999px;
 
-            background: #E9E7FF;
+    background: #E9E7FF;
 
-            color: #5146D8;
+    color: #5146D8;
 
-            padding: 6px 13px;
+    font-size: 12px;
+    font-weight: 800;
 
-            border-radius: 999px;
+    margin-bottom: 12px;
+}
 
-            font-size: 12px;
+.quiz-question-text {
+    color: #101828;
 
-            font-weight: 800;
+    font-size: 18px;
+    font-weight: 700;
 
-            margin-bottom: 13px;
-        }
+    line-height: 1.55;
+}
 
-        .quiz-question {
-            color: #101828;
+.quiz-result-card {
+    background:
+        linear-gradient(
+            135deg,
+            #F5F3FF,
+            #EEF4FF
+        );
 
-            font-size: 18px;
+    border: 1px solid #DDD9FF;
 
-            line-height: 1.55;
+    border-radius: 24px;
 
-            font-weight: 700;
-        }
+    padding: 30px;
 
-        /* =====================================
-           RESULT CARD
-        ====================================== */
+    text-align: center;
 
-        .quiz-result {
+    margin: 25px 0;
 
-            border-radius: 24px;
+    box-shadow:
+        0 12px 35px rgba(16, 24, 40, 0.08);
+}
 
-            padding: 32px;
+.quiz-result-label {
+    color: #667085;
 
-            text-align: center;
+    font-size: 14px;
+    font-weight: 700;
+}
 
-            margin-top: 25px;
-            margin-bottom: 25px;
+.quiz-score {
+    color: #5146D8;
 
-            background:
-                linear-gradient(
-                    135deg,
-                    #F5F3FF 0%,
-                    #EEF4FF 100%
-                );
+    font-size: 50px;
+    font-weight: 900;
 
-            border: 1px solid rgba(99, 91, 255, 0.15);
+    margin: 5px 0;
+}
 
-            box-shadow:
-                0 12px 35px rgba(31, 41, 55, 0.08);
-        }
+.quiz-percent {
+    color: #344054;
 
-        .quiz-result-label {
-            color: #667085;
+    font-size: 17px;
+    font-weight: 700;
+}
 
-            font-size: 14px;
+.quiz-detail-title {
+    color: #101828;
 
-            font-weight: 700;
+    font-size: 20px;
+    font-weight: 800;
 
-            margin-bottom: 5px;
-        }
+    margin-top: 25px;
+    margin-bottom: 15px;
+}
 
-        .quiz-score {
-            color: #5146D8;
-
-            font-size: 52px;
-
-            font-weight: 900;
-
-            line-height: 1.1;
-
-            margin: 5px 0;
-        }
-
-        .quiz-percentage {
-            color: #344054;
-
-            font-size: 17px;
-
-            font-weight: 700;
-        }
-
-        /* =====================================
-           RESULT MESSAGE
-        ====================================== */
-
-        .quiz-message {
-
-            text-align: center;
-
-            font-size: 16px;
-
-            font-weight: 700;
-
-            margin: 10px 0 20px 0;
-
-            color: #344054;
-        }
-
-        /* =====================================
-           DETAIL
-        ====================================== */
-
-        .detail-title {
-
-            font-size: 20px;
-
-            font-weight: 800;
-
-            color: #101828;
-
-            margin-top: 25px;
-            margin-bottom: 15px;
-        }
-
-        .result-item {
-
-            border-radius: 14px;
-
-            padding: 13px 16px;
-
-            margin: 8px 0;
-
-            font-size: 14px;
-
-            font-weight: 600;
-        }
-
-        .result-correct {
-
-            background: #ECFDF3;
-
-            border: 1px solid #ABEFC6;
-
-            color: #067647;
-        }
-
-        .result-wrong {
-
-            background: #FEF3F2;
-
-            border: 1px solid #FECDCA;
-
-            color: #B42318;
-        }
-
-        .result-empty {
-
-            background: #FFFAEB;
-
-            border: 1px solid #FEDF89;
-
-            color: #B54708;
-        }
-
-        </style>
+</style>
         """,
         unsafe_allow_html=True
     )
@@ -241,19 +149,24 @@ def display_quiz(quiz):
 
     st.markdown(
         """
-        <div class="quiz-title">
-            ❓ Quiz
-        </div>
+<div class="quiz-title">
+    ❓ Quiz
+</div>
 
-        <div class="quiz-subtitle">
-            Kiểm tra mức độ hiểu bài của bạn
-        </div>
+<div class="quiz-subtitle">
+    Kiểm tra mức độ hiểu bài của bạn
+</div>
         """,
         unsafe_allow_html=True
     )
 
+    st.progress(
+        0,
+        text=f"📝 {len(quiz)} câu hỏi"
+    )
+
     # =====================================================
-    # QUIZ FORM
+    # FORM
     # =====================================================
 
     with st.form("quiz_form"):
@@ -262,46 +175,38 @@ def display_quiz(quiz):
 
         for i, question in enumerate(quiz):
 
-            question_text = html.escape(
-                str(
-                    question.get(
-                        "question",
-                        "Không có câu hỏi."
-                    )
+            question_text = str(
+                question.get(
+                    "question",
+                    "Không có câu hỏi."
                 )
             )
 
-            # ---------------------------------------------
-            # QUESTION CARD
-            # ---------------------------------------------
-
             st.markdown(
                 f"""
-                <div class="quiz-card">
+<div class="quiz-question-card">
 
-                    <div class="quiz-number">
-                        ❓ CÂU {i + 1}
-                    </div>
+<div class="quiz-number">
+❓ CÂU {i + 1}
+</div>
 
-                    <div class="quiz-question">
-                        {question_text}
-                    </div>
+<div class="quiz-question-text">
+{question_text}
+</div>
 
-                </div>
+</div>
                 """,
                 unsafe_allow_html=True
             )
 
-            # ---------------------------------------------
-            # OPTIONS
-            # ---------------------------------------------
+            options = question.get(
+                "options",
+                []
+            )
 
             selected = st.radio(
                 "Chọn đáp án:",
-                question.get(
-                    "options",
-                    []
-                ),
+                options,
                 key=f"quiz_{i}",
                 index=None
             )
@@ -327,21 +232,26 @@ def display_quiz(quiz):
         wrong_questions = []
 
         # =================================================
-        # CALCULATE SCORE
+        # CHECK ANSWERS
         # =================================================
 
         for i, question in enumerate(quiz):
 
             selected = answers[i]
 
-            correct = question.get(
-                "answer",
-                ""
-            )
+            correct = str(
+                question.get(
+                    "answer",
+                    ""
+                )
+            ).strip().upper()
 
             if selected:
 
-                selected_letter = selected[0]
+                selected_letter = (
+                    str(selected)[0]
+                    .upper()
+                )
 
                 if selected_letter == correct:
 
@@ -383,8 +293,10 @@ def display_quiz(quiz):
 
                 })
 
+        total = len(quiz)
+
         percentage = int(
-            score / len(quiz) * 100
+            score / total * 100
         )
 
         # =================================================
@@ -393,7 +305,7 @@ def display_quiz(quiz):
 
         st.session_state.quiz_score = score
 
-        st.session_state.quiz_total = len(quiz)
+        st.session_state.quiz_total = total
 
         st.session_state.quiz_percentage = percentage
 
@@ -405,21 +317,21 @@ def display_quiz(quiz):
 
         st.markdown(
             f"""
-            <div class="quiz-result">
+<div class="quiz-result-card">
 
-                <div class="quiz-result-label">
-                    🎯 KẾT QUẢ CỦA BẠN
-                </div>
+<div class="quiz-result-label">
+🎯 KẾT QUẢ CỦA BẠN
+</div>
 
-                <div class="quiz-score">
-                    {score} / {len(quiz)}
-                </div>
+<div class="quiz-score">
+{score} / {total}
+</div>
 
-                <div class="quiz-percentage">
-                    {percentage}% chính xác
-                </div>
+<div class="quiz-percent">
+{percentage}% chính xác
+</div>
 
-            </div>
+</div>
             """,
             unsafe_allow_html=True
         )
@@ -430,45 +342,38 @@ def display_quiz(quiz):
 
         if percentage >= 80:
 
-            message = "🎉 Xuất sắc! Bạn đã nắm khá tốt kiến thức."
+            st.success(
+                "🎉 Xuất sắc! Bạn đã nắm khá tốt kiến thức."
+            )
 
         elif percentage >= 50:
 
-            message = "👍 Khá tốt! Hãy ôn thêm những phần còn chưa chắc."
+            st.warning(
+                "👍 Khá tốt! Hãy ôn thêm những phần còn chưa chắc."
+            )
 
         else:
 
-            message = "📖 Đừng lo! Hãy xem lại bài và thử lại nhé."
-
-        st.markdown(
-            f"""
-            <div class="quiz-message">
-                {message}
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
-
-        # =================================================
-        # PROGRESS
-        # =================================================
+            st.error(
+                "📖 Đừng lo! Hãy xem lại bài và thử lại nhé."
+            )
 
         st.progress(
             percentage / 100,
-            text=f"📊 Mức độ chính xác: {percentage}%"
+            text=f"📊 Độ chính xác: {percentage}%"
         )
 
         # =================================================
-        # REVIEW MESSAGE
+        # REVIEW
         # =================================================
 
         if wrong_questions:
 
             st.markdown(
                 """
-                <div class="detail-title">
-                    💡 Gợi ý ôn lại
-                </div>
+<div class="quiz-detail-title">
+💡 Gợi ý ôn lại
+</div>
                 """,
                 unsafe_allow_html=True
             )
@@ -478,9 +383,8 @@ def display_quiz(quiz):
             )
 
             st.success(
-                "🃏 Snap2Study đã chuyển những câu "
-                "bạn làm chưa đúng thành Flashcard "
-                "để bạn ôn lại."
+                "🃏 Những câu chưa đúng đã được chuyển "
+                "thành Flashcard để bạn ôn lại bên dưới."
             )
 
         else:
@@ -490,14 +394,14 @@ def display_quiz(quiz):
             )
 
         # =================================================
-        # DETAILED RESULT
+        # DETAIL
         # =================================================
 
         st.markdown(
             """
-            <div class="detail-title">
-                📋 Kết quả chi tiết
-            </div>
+<div class="quiz-detail-title">
+📋 Kết quả chi tiết
+</div>
             """,
             unsafe_allow_html=True
         )
@@ -506,71 +410,46 @@ def display_quiz(quiz):
 
             selected = answers[i]
 
-            correct = question.get(
-                "answer",
-                ""
-            )
+            correct = str(
+                question.get(
+                    "answer",
+                    ""
+                )
+            ).strip().upper()
 
             if selected:
 
-                selected_letter = selected[0]
+                selected_letter = (
+                    str(selected)[0]
+                    .upper()
+                )
 
                 if selected_letter == correct:
 
-                    st.markdown(
-                        f"""
-                        <div class="result-item result-correct">
-                            Câu {i + 1} &nbsp;·&nbsp;
-                            ✅ Chính xác
-                        </div>
-                        """,
-                        unsafe_allow_html=True
+                    st.success(
+                        f"Câu {i + 1}: ✅ Chính xác"
                     )
 
                 else:
 
-                    correct_text = html.escape(
-                        str(
-                            question.get(
-                                "correct_answer",
-                                correct
-                            )
-                        )
+                    correct_text = question.get(
+                        "correct_answer",
+                        correct
                     )
 
-                    st.markdown(
-                        f"""
-                        <div class="result-item result-wrong">
-                            Câu {i + 1} &nbsp;·&nbsp;
-                            ❌ Sai<br>
-                            <small>
-                                Đáp án đúng: {correct_text}
-                            </small>
-                        </div>
-                        """,
-                        unsafe_allow_html=True
+                    st.error(
+                        f"Câu {i + 1}: ❌ Sai — "
+                        f"Đáp án đúng: {correct_text}"
                     )
 
             else:
 
-                correct_text = html.escape(
-                    str(
-                        question.get(
-                            "correct_answer",
-                            correct
-                        )
-                    )
+                correct_text = question.get(
+                    "correct_answer",
+                    correct
                 )
 
-                st.markdown(
-                    f"""
-                    <div class="result-item result-empty">
-                        Câu {i + 1} &nbsp;·&nbsp;
-                        ⚪ Chưa trả lời<br>
-                        <small>
-                            Đáp án đúng: {correct_text}
-                        </small>
-                    </div>
-                    """,
-                    unsafe_allow_html=True
+                st.warning(
+                    f"Câu {i + 1}: ⚪ Chưa trả lời — "
+                    f"Đáp án đúng: {correct_text}"
                 )
