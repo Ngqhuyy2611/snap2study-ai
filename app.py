@@ -1,5 +1,6 @@
 import streamlit as st
 from PIL import Image
+from datetime import datetime
 
 from ocr import extract_text
 from ai import generate_study_material
@@ -17,6 +18,20 @@ st.set_page_config(
     layout="wide",
     initial_sidebar_state="collapsed"
 )
+
+
+# =========================================================
+# SESSION STATE
+# =========================================================
+
+if "study_data" not in st.session_state:
+    st.session_state.study_data = None
+
+if "history" not in st.session_state:
+    st.session_state.history = []
+
+if "review_cards" not in st.session_state:
+    st.session_state.review_cards = []
 
 
 # =========================================================
@@ -220,7 +235,7 @@ st.markdown("""
 
 
 /* ========================================================
-   STREAMLIT FILE UPLOADER
+   FILE UPLOADER
    ======================================================== */
 
 [data-testid="stFileUploader"] {
@@ -352,6 +367,60 @@ hr {
 
 
 # =========================================================
+# SIDEBAR - HISTORY
+# =========================================================
+
+with st.sidebar:
+
+    st.markdown("## 📚 Lịch sử học tập")
+
+    st.caption(
+        "Các bộ ôn tập bạn đã tạo trong phiên hiện tại."
+    )
+
+    if not st.session_state.history:
+
+        st.info("Chưa có bài học nào.")
+
+    else:
+
+        for i, item in enumerate(
+            reversed(st.session_state.history)
+        ):
+
+            history_index = (
+                len(st.session_state.history) - 1 - i
+            )
+
+            topic = item.get(
+                "topic",
+                "Bài học không có tên"
+            )
+
+            timestamp = item.get(
+                "time",
+                ""
+            )
+
+            if st.button(
+                f"📖 {topic}",
+                key=f"history_{history_index}",
+                use_container_width=True
+            ):
+
+                st.session_state.study_data = item["data"]
+
+                st.session_state.flashcard_index = 0
+                st.session_state.flashcard_flipped = False
+
+                st.session_state.review_cards = []
+
+                st.rerun()
+
+            st.caption(timestamp)
+
+
+# =========================================================
 # HEADER
 # =========================================================
 
@@ -359,9 +428,11 @@ st.markdown("""
 <div class="snap-header">
 <div class="snap-logo">
 <div class="snap-logo-icon">📚</div>
+
 <div class="snap-logo-text">
 Snap2Study <span class="snap-logo-ai">AI</span>
 </div>
+
 </div>
 </div>
 """, unsafe_allow_html=True)
@@ -373,6 +444,7 @@ Snap2Study <span class="snap-logo-ai">AI</span>
 
 st.markdown("""
 <div class="hero-section">
+
 <div class="hero-badge">
 ✨ AI-powered study assistant
 </div>
@@ -386,6 +458,7 @@ cùng <span class="hero-gradient">Snap2Study AI</span>
 Biến tài liệu học tập thành Flashcard và Quiz
 bằng AI, giúp bạn ôn tập nhanh hơn và hiệu quả hơn.
 </p>
+
 </div>
 """, unsafe_allow_html=True)
 
@@ -401,7 +474,10 @@ with col1:
 
     st.markdown("""
 <div class="feature-card">
-<div class="feature-icon">📷</div>
+
+<div class="feature-icon">
+📷
+</div>
 
 <div class="feature-title">
 Nhận diện tài liệu
@@ -411,6 +487,7 @@ Nhận diện tài liệu
 Tải ảnh bài học và để OCR
 chuyển nội dung trong ảnh thành văn bản.
 </div>
+
 </div>
 """, unsafe_allow_html=True)
 
@@ -419,7 +496,10 @@ with col2:
 
     st.markdown("""
 <div class="feature-card">
-<div class="feature-icon">🃏</div>
+
+<div class="feature-icon">
+🃏
+</div>
 
 <div class="feature-title">
 Flashcard thông minh
@@ -429,6 +509,7 @@ Flashcard thông minh
 AI biến nội dung bài học thành
 những câu hỏi và đáp án dễ ôn tập.
 </div>
+
 </div>
 """, unsafe_allow_html=True)
 
@@ -437,7 +518,10 @@ with col3:
 
     st.markdown("""
 <div class="feature-card">
-<div class="feature-icon">❓</div>
+
+<div class="feature-icon">
+❓
+</div>
 
 <div class="feature-title">
 Quiz kiểm tra
@@ -447,6 +531,7 @@ Quiz kiểm tra
 Kiểm tra mức độ hiểu bài
 với các câu hỏi trắc nghiệm do AI tạo.
 </div>
+
 </div>
 """, unsafe_allow_html=True)
 
@@ -468,6 +553,7 @@ Tải lên một trang tài liệu để Snap2Study AI tạo bộ ôn tập cho 
 
 st.markdown("""
 <div class="upload-card">
+
 <div class="upload-title">
 📷 Tải tài liệu học tập
 </div>
@@ -475,13 +561,10 @@ st.markdown("""
 <div class="upload-description">
 Chọn ảnh rõ nét của trang sách hoặc tài liệu.
 </div>
+
 </div>
 """, unsafe_allow_html=True)
 
-
-# =========================================================
-# FILE UPLOADER
-# =========================================================
 
 uploaded_file = st.file_uploader(
     "Chọn ảnh bài học",
@@ -541,7 +624,9 @@ cùng Quiz cho bạn.
 
         if create_button:
 
-            with st.spinner("🔍 Đang đọc tài liệu..."):
+            with st.spinner(
+                "🔍 Đang đọc tài liệu..."
+            ):
 
                 text = extract_text(image)
 
@@ -555,7 +640,9 @@ cùng Quiz cho bạn.
 
             else:
 
-                with st.expander("🔎 Nội dung đã nhận diện"):
+                with st.expander(
+                    "🔎 Nội dung đã nhận diện"
+                ):
 
                     st.write(text)
 
@@ -573,6 +660,43 @@ cùng Quiz cho bạn.
 
                         st.session_state.study_data = study_data
 
+                        # Reset flashcard
+                        st.session_state.flashcard_index = 0
+                        st.session_state.flashcard_flipped = False
+
+                        # Reset review
+                        st.session_state.review_cards = []
+
+                        # ==============================
+                        # SAVE HISTORY
+                        # ==============================
+
+                        history_item = {
+                            "topic": study_data.get(
+                                "topic",
+                                "Bài học mới"
+                            ),
+
+                            "time": datetime.now().strftime(
+                                "%d/%m/%Y %H:%M"
+                            ),
+
+                            "data": study_data
+                        }
+
+                        st.session_state.history.append(
+                            history_item
+                        )
+
+                        # Chỉ giữ 10 bài gần nhất
+                        if len(
+                            st.session_state.history
+                        ) > 10:
+
+                            st.session_state.history = (
+                                st.session_state.history[-10:]
+                            )
+
                         st.success(
                             "🎉 Đã tạo bộ ôn tập thành công!"
                         )
@@ -588,7 +712,7 @@ cùng Quiz cho bạn.
 # STUDY RESULTS
 # =========================================================
 
-if "study_data" in st.session_state:
+if st.session_state.study_data:
 
     data = st.session_state.study_data
 
@@ -633,6 +757,31 @@ if "study_data" in st.session_state:
     display_quiz(
         data.get("quiz", [])
     )
+
+
+    # =====================================================
+    # REVIEW WRONG ANSWERS
+    # =====================================================
+
+    if st.session_state.review_cards:
+
+        st.divider()
+
+        st.markdown("""
+<div class="section-title">
+🔁 Ôn lại phần chưa chắc
+</div>
+
+<div class="section-description">
+Những câu bạn làm chưa đúng được chuyển thành
+Flashcard để ôn lại.
+</div>
+""", unsafe_allow_html=True)
+
+        display_flashcards(
+            st.session_state.review_cards,
+            title="🔁 Flashcard ôn lại"
+        )
 
 
 # =========================================================
