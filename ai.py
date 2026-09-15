@@ -5,50 +5,83 @@ from dotenv import load_dotenv
 from google import genai
 
 
+# =========================================================
+# SETUP
+# =========================================================
+
 load_dotenv()
 
 api_key = os.getenv("GEMINI_API_KEY")
 
 if not api_key:
     raise ValueError(
-        "Không tìm thấy GEMINI_API_KEY trong file .env"
+        "Không tìm thấy GEMINI_API_KEY"
     )
 
 client = genai.Client(
-    api_key=os.getenv("GEMINI_API_KEY")
+    api_key=api_key
 )
 
 
-def generate_study_material(text, number_of_cards=5):
+# =========================================================
+# GENERATE STUDY MATERIAL
+# =========================================================
+
+def generate_study_material(
+    text,
+    number_of_cards=5
+):
 
     prompt = f"""
-Bạn là Snap2Study AI, một trợ lý học tập dành cho học sinh THPT.
+Bạn là Snap2Study AI, một trợ lý học tập
+dành cho học sinh THPT.
 
 Hãy đọc tài liệu dưới đây và tạo một bộ ôn tập.
 
 YÊU CẦU:
 
 1. Xác định chủ đề chính.
-2. Tạo một phần tóm tắt ngắn, dễ hiểu.
-3. Tạo {number_of_cards} flashcard.
-4. Mỗi flashcard gồm:
-   - question
-   - answer
-   - difficulty
-5. Tạo 5 câu hỏi trắc nghiệm.
-6. Mỗi câu có 4 lựa chọn A, B, C, D.
-7. Chỉ sử dụng kiến thức có trong tài liệu.
-8. Không tự bịa thêm kiến thức.
-9. Nội dung phù hợp với học sinh THPT.
+
+2. Tạo một phần tóm tắt ngắn,
+dễ hiểu và chỉ dựa trên tài liệu.
+
+3. Tạo {number_of_cards} Flashcard.
+
+Mỗi Flashcard gồm:
+
+- question
+- answer
+- difficulty
+
+4. Tạo 5 câu hỏi trắc nghiệm.
+
+Mỗi câu hỏi gồm:
+
+- question
+- options: đúng 4 lựa chọn A, B, C, D
+- answer: chỉ ghi chữ cái A, B, C hoặc D
+- correct_answer: ghi đầy đủ nội dung đáp án đúng
+
+5. Chỉ sử dụng kiến thức có trong tài liệu.
+
+6. Không tự bịa thêm kiến thức.
+
+7. Nếu tài liệu không đủ thông tin,
+hãy tạo ít nội dung hơn thay vì bịa.
+
+8. Nội dung phải phù hợp với học sinh THPT.
+
+9. Câu hỏi nên kiểm tra kiến thức quan trọng
+thay vì hỏi những chi tiết không cần thiết.
 
 CHỈ TRẢ VỀ JSON.
 
-Cấu trúc JSON:
+Cấu trúc JSON bắt buộc:
 
 {{
     "topic": "Tên chủ đề",
 
-    "summary": "Tóm tắt ngắn gọn nội dung",
+    "summary": "Tóm tắt bài học",
 
     "flashcards": [
         {{
@@ -60,14 +93,15 @@ Cấu trúc JSON:
 
     "quiz": [
         {{
-            "question": "Câu hỏi trắc nghiệm",
+            "question": "Câu hỏi",
             "options": [
                 "A. Đáp án A",
                 "B. Đáp án B",
                 "C. Đáp án C",
                 "D. Đáp án D"
             ],
-            "answer": "A"
+            "answer": "A",
+            "correct_answer": "Nội dung đầy đủ của đáp án đúng"
         }}
     ]
 }}
@@ -77,10 +111,6 @@ TÀI LIỆU:
 {text}
 """
 
-    # LƯU Ý: "gemini-3.6-flash" không phải tên model chuẩn của Gemini API.
-    # Hãy chạy list_models.py để lấy danh sách model thật sự khả dụng
-    # với API key của bạn (vd: "gemini-2.0-flash", "gemini-1.5-flash", ...)
-    # rồi thay giá trị bên dưới cho đúng.
     response = client.models.generate_content(
         model="gemini-3.6-flash",
         contents=prompt
@@ -88,23 +118,25 @@ TÀI LIỆU:
 
     result = response.text.strip()
 
-    # Loại bỏ markdown nếu Gemini trả về ```json
+
+    # =====================================================
+    # REMOVE MARKDOWN CODE BLOCK
+    # =====================================================
+
     if result.startswith("```json"):
         result = result[7:]
 
-    if result.startswith("```"):
+    elif result.startswith("```"):
         result = result[3:]
 
     if result.endswith("```"):
         result = result[:-3]
 
-    result = result.strip()
 
-    try:
-        return json.loads(result)
+    # =====================================================
+    # PARSE JSON
+    # =====================================================
 
-    except json.JSONDecodeError:
-        raise ValueError(
-            "Gemini không trả về JSON hợp lệ.\n\n"
-            f"Kết quả Gemini trả về:\n{result}"
-        )
+    return json.loads(
+        result.strip()
+    )
