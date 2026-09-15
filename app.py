@@ -24,7 +24,7 @@ st.set_page_config(
 # CUSTOM CSS
 # =========================================================
 
-st.markdown("""
+st.markdown(textwrap.dedent("""
 <style>
 
 /* ========================================================
@@ -374,7 +374,7 @@ st.markdown(textwrap.dedent("""
 # HERO
 # =========================================================
 
-st.markdown("""
+st.markdown(textwrap.dedent("""
 <div class="hero-section">
 
     <div class="hero-badge">
@@ -403,7 +403,7 @@ col1, col2, col3 = st.columns(3)
 
 with col1:
 
-    st.markdown("""
+    st.markdown(textwrap.dedent("""
     <div class="feature-card">
 
         <div class="feature-icon">
@@ -425,7 +425,7 @@ with col1:
 
 with col2:
 
-    st.markdown("""
+    st.markdown(textwrap.dedent("""
     <div class="feature-card">
 
         <div class="feature-icon">
@@ -447,7 +447,7 @@ with col2:
 
 with col3:
 
-    st.markdown("""
+    st.markdown(textwrap.dedent("""
     <div class="feature-card">
 
         <div class="feature-icon">
@@ -471,7 +471,7 @@ with col3:
 # UPLOAD SECTION
 # =========================================================
 
-st.markdown("""
+st.markdown(textwrap.dedent("""
 <div class="section-title">
     🚀 Bắt đầu học
 </div>
@@ -482,7 +482,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 
-st.markdown("""
+st.markdown(textwrap.dedent("""
 <div class="upload-card">
 
     <div class="upload-title">
@@ -527,7 +527,7 @@ if uploaded_file:
 
     with col2:
 
-        st.markdown("""
+        st.markdown(textwrap.dedent("""
         <div class="feature-card">
 
             <div class="feature-title">
