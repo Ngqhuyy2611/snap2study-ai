@@ -1,4 +1,5 @@
 import streamlit as st
+import textwrap
 from PIL import Image
 
 from ocr import extract_text
