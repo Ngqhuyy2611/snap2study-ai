@@ -351,7 +351,7 @@ hr {
 # HEADER
 # =========================================================
 
-st.markdown("""
+st.markdown(textwrap.dedent("""
 <div class="snap-header">
 
     <div class="snap-logo">
