@@ -637,7 +637,7 @@ if "study_data" in st.session_state:
 # FOOTER
 # =========================================================
 
-st.markdown("""
+st.markdown(textwrap.dedent("""
 <div class="snap-footer">
 
     Made with ✨ by <strong>Snap2Study AI</strong>
