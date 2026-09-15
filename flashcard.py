@@ -145,18 +145,17 @@ def display_flashcards(
 
 .snap-card-question {
     background:
-        radial-gradient(
-            circle at top right,
-            rgba(129, 140, 248, 0.28),
-            transparent 35%
-        ),
         linear-gradient(
             135deg,
-            #f8f7ff 0%,
-            #eef3ff 100%
-        );
+            #FFFFFF 0%,
+            #F8F7FF 100%
+        ) !important;
 
-    border: 1px solid #d9d6ff;
+    border: 2px solid #BDB7FF !important;
+
+    box-shadow:
+        0 14px 34px rgba(99, 91, 255, 0.12),
+        0 3px 8px rgba(16, 24, 40, 0.06) !important;
 }
 
 
