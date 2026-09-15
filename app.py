@@ -655,7 +655,7 @@ cùng Quiz cho bạn.
 
                         study_data = generate_study_material(
                             text,
-                            number_of_cards=5
+                            number_of_cards=5,
                             number_of_quiz=5
                         )
 
