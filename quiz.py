@@ -15,27 +15,24 @@ def display_quiz(quiz):
 
     st.write("")
 
-    # =========================
-    # FORM
-    # =========================
-
     with st.form("quiz_form"):
 
         answers = []
 
         for i, question in enumerate(quiz):
 
-            st.markdown(
-                f"### Câu {i + 1}"
-            )
+            st.markdown(f"### Câu {i + 1}")
 
             st.write(
-                question["question"]
+                question.get(
+                    "question",
+                    "Không có câu hỏi."
+                )
             )
 
             selected = st.radio(
                 "Chọn đáp án:",
-                question["options"],
+                question.get("options", []),
                 key=f"quiz_{i}",
                 index=None
             )
@@ -49,51 +46,86 @@ def display_quiz(quiz):
             use_container_width=True
         )
 
-    # =========================
-    # CHẤM ĐIỂM
-    # =========================
-
     if submitted:
 
         score = 0
+        wrong_questions = []
 
         for i, question in enumerate(quiz):
 
             selected = answers[i]
-
-            correct = question["answer"]
+            correct = question.get("answer", "")
 
             if selected:
 
-                # Lấy chữ cái A/B/C/D
                 selected_letter = selected[0]
 
                 if selected_letter == correct:
                     score += 1
 
-        st.divider()
+                else:
+                    wrong_questions.append({
+                        "question": question.get(
+                            "question",
+                            ""
+                        ),
+                        "answer": question.get(
+                            "correct_answer",
+                            correct
+                        ),
+                        "difficulty": "Cần ôn lại"
+                    })
+
+            else:
+
+                wrong_questions.append({
+                    "question": question.get(
+                        "question",
+                        ""
+                    ),
+                    "answer": question.get(
+                        "correct_answer",
+                        correct
+                    ),
+                    "difficulty": "Cần ôn lại"
+                })
 
         percentage = int(
             score / len(quiz) * 100
         )
 
+        # Lưu kết quả
+        st.session_state.quiz_score = score
+        st.session_state.quiz_total = len(quiz)
+        st.session_state.quiz_percentage = percentage
+        st.session_state.review_cards = wrong_questions
+
+        st.divider()
+
+        # ==========================
+        # SCORE
+        # ==========================
+
         if percentage >= 80:
 
             st.success(
-                f"🎉 Xuất sắc! Bạn đạt {score}/{len(quiz)} câu."
+                f"🎉 Xuất sắc! Bạn đạt "
+                f"{score}/{len(quiz)} câu."
             )
 
         elif percentage >= 50:
 
             st.warning(
-                f"👍 Khá tốt! Bạn đạt {score}/{len(quiz)} câu."
+                f"👍 Khá tốt! Bạn đạt "
+                f"{score}/{len(quiz)} câu."
             )
 
         else:
 
             st.error(
-                f"📖 Bạn đạt {score}/{len(quiz)} câu. "
-                "Hãy ôn lại Flashcard nhé!"
+                f"📖 Bạn đạt "
+                f"{score}/{len(quiz)} câu. "
+                f"Hãy ôn lại kiến thức nhé!"
             )
 
         st.progress(
@@ -101,17 +133,46 @@ def display_quiz(quiz):
             text=f"Điểm số: {percentage}%"
         )
 
-        # =========================
-        # CHI TIẾT ĐÁP ÁN
-        # =========================
+        # ==========================
+        # REVIEW
+        # ==========================
 
-        st.subheader("📋 Kết quả chi tiết")
+        if wrong_questions:
+
+            st.divider()
+
+            st.subheader(
+                "💡 Gợi ý ôn lại"
+            )
+
+            st.write(
+                f"Bạn có **{len(wrong_questions)} câu "
+                f"cần ôn lại**."
+            )
+
+            st.info(
+                "Snap2Study đã tạo một bộ Flashcard "
+                "từ những câu bạn làm chưa đúng."
+            )
+
+        else:
+
+            st.success(
+                "🏆 Tuyệt vời! Bạn không có câu sai."
+            )
+
+        # ==========================
+        # DETAILED RESULT
+        # ==========================
+
+        st.subheader(
+            "📋 Kết quả chi tiết"
+        )
 
         for i, question in enumerate(quiz):
 
             selected = answers[i]
-
-            correct = question["answer"]
+            correct = question.get("answer", "")
 
             if selected:
 
